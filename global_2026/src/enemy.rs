@@ -17,6 +17,9 @@ pub fn enemy_setup(
 
     // Use only the subset of sprites in the sheet that make up the run animation
     let animation_indices = AnimationIndices { first: 0, last: 2 };
+    let mut tr = Transform::from_scale(Vec3::splat(4.0));
+    tr.translation = Vec3::new(150.0, 70.0, 1.0);
+
 
     commands.spawn((
         Enemy,
@@ -27,7 +30,7 @@ pub fn enemy_setup(
                 index: animation_indices.first,
             },
         ),
-        Transform::from_scale(Vec3::splat(10.0)),
+        tr,
         animation_indices,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
     ));

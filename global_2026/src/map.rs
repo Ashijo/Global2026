@@ -14,7 +14,7 @@ pub fn map_setup(
             image: asset_server.load("map.png"),
             ..default()
         },
-        Transform::from_xyz(0.0, 0.0, 1.0),
+        Transform::from_xyz(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT / 2.0, 0.0),
     ));
 }
 
