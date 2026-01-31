@@ -3,6 +3,9 @@ use bevy::prelude::*;
 #[derive(Component)]
 pub struct ExitButton;
 
+#[derive(Component)]
+pub struct RestartButton;
+
 pub fn hud_setup(mut commands: Commands) {
     // Version text (bottom-right)
     commands.spawn((
@@ -20,7 +23,7 @@ pub fn hud_setup(mut commands: Commands) {
         },
     ));
 
-    // Exit button (just above the version text)
+    // Exit Button
     commands
         .spawn((
             Button,
@@ -44,16 +47,46 @@ pub fn hud_setup(mut commands: Commands) {
                 TextColor(Color::WHITE.into()),
             ));
         });
+
+    // Restart Button
+    commands
+        .spawn((
+            Button,
+            RestartButton,
+            Node {
+                position_type: PositionType::Absolute,
+                top: Val::Px(10.0),
+                right: Val::Px(70.0),
+                padding: UiRect::all(Val::Px(6.0)),
+                ..default()
+            },
+            BackgroundColor(Color::srgb(0.2, 0.2, 0.2)),
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Text::new("Restart"),
+                TextFont {
+                    font_size: 16.0,
+                    ..default()
+                },
+                TextColor(Color::WHITE.into()),
+            ));
+        });
 }
 
-pub fn exit_button_system(
+pub fn hud_update(
     mut commands: Commands,
-    button_query: Query<&Interaction, (Changed<Interaction>, With<ExitButton>)>,
+    query: Query<(&Interaction, Option<&RestartButton>, Option<&ExitButton>), Changed<Interaction>>,
 ) {
-    for interaction in &button_query {
+    for (interaction, restart, exit) in &query {
         if *interaction == Interaction::Pressed {
-            // Send the exit message via commands
-            commands.write_message(AppExit::Success);
+            if exit.is_some() {
+                commands.write_message(AppExit::Success);
+            }
+            if restart.is_some() {
+                //next_state.set(GameState::GameOver);
+                println!("Restart button pressed!");
+            }
         }
     }
 }
