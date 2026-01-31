@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 
-use crate::shared_comp::Hitbox;
+use crate::collision::Hitbox;
 
 const ENEMY_VELOCITY: f32 = 400.0;
 const EPSILON: f32 = 5.0;
@@ -49,12 +49,7 @@ pub fn enemy_setup(
         transform,
         animation_indices_1,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
-        Hitbox {
-            min_x: -10.0,
-            min_y: -10.0,
-            max_x: 10.0,
-            max_y: 10.0,
-        },
+        Hitbox {size: Vec2::new(32.0, 32.0)},
     ));
 
     commands.spawn((
@@ -72,12 +67,7 @@ pub fn enemy_setup(
         transform,
         animation_indices_2,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
-        Hitbox {
-            min_x: -10.0,
-            min_y: -10.0,
-            max_x: 10.0,
-            max_y: 10.0,
-        },
+        Hitbox {size: Vec2::new(32.0, 32.0)},
     ));
 
     commands.spawn((
@@ -95,12 +85,7 @@ pub fn enemy_setup(
         transform,
         animation_indices_3,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
-        Hitbox {
-            min_x: -10.0,
-            min_y: -10.0,
-            max_x: 10.0,
-            max_y: 10.0,
-        },
+        Hitbox {size: Vec2::new(32.0, 32.0)},
     ));
 }
 

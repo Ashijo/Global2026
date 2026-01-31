@@ -6,7 +6,6 @@ mod hud;
 mod mask;
 mod blast;
 mod collision;
-mod shared_comp;
 
 use bevy::prelude::*;
 use bevy::camera::ScalingMode;
