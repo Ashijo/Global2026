@@ -1,5 +1,8 @@
 use bevy::prelude::*;
-use crate::bomb::{Bomb, BOMB_SIZE, BOMB_Z};
+use crate::player::Player;
+use crate::enemy::Enemy;
+use crate::bomb::{BOMB_SIZE, BOMB_Z};
+use crate::collision::Hitbox;
 pub const BLAST_SIZE: f32 = BOMB_SIZE;
 pub const BLAST_LENGTH: u32 = 3;
 pub const BLAST_DURATION: f32 = 1.0;
@@ -29,6 +32,7 @@ pub fn spawn_blast(commands: &mut Commands, asset_server: &Res<AssetServer>, cen
             ..default()
         },
         Transform::from_xyz(center.x, center.y, BLAST_Z),
+        Hitbox { size: Vec2::splat(BLAST_SIZE) },
     ));
 
     // spawn blast arms
@@ -47,6 +51,7 @@ pub fn spawn_blast(commands: &mut Commands, asset_server: &Res<AssetServer>, cen
                 ..default()
             },
             Transform::from_xyz(center.x, center.y + offset, BLAST_Z),
+            Hitbox { size: Vec2::splat(BLAST_SIZE) },
         ));
 
         // Down
@@ -61,6 +66,7 @@ pub fn spawn_blast(commands: &mut Commands, asset_server: &Res<AssetServer>, cen
                 ..default()
             },
             Transform::from_xyz(center.x, center.y - offset, BLAST_Z),
+            Hitbox { size: Vec2::splat(BLAST_SIZE) },
         ));
 
         // Right
@@ -75,6 +81,7 @@ pub fn spawn_blast(commands: &mut Commands, asset_server: &Res<AssetServer>, cen
                 ..default()
             },
             Transform::from_xyz(center.x + offset, center.y, BLAST_Z),
+            Hitbox { size: Vec2::splat(BLAST_SIZE) },
         ));
 
         // Left
@@ -89,7 +96,49 @@ pub fn spawn_blast(commands: &mut Commands, asset_server: &Res<AssetServer>, cen
                 ..default()
             },
             Transform::from_xyz(center.x - offset, center.y, BLAST_Z),
+            Hitbox { size: Vec2::splat(BLAST_SIZE) },
         ));
+    }
+}
+
+pub fn blast_collision_system(
+    blast_query: Query<(&Transform, &Hitbox), With<Blast>>,
+    target_query: Query<
+        (
+            Entity,
+            &Transform,
+            &Hitbox,
+            Option<&Player>,
+            Option<&Enemy>,
+        ),
+    >,
+) {
+    for (blast_tf, blast_hitbox) in blast_query.iter() {
+        let blast_pos = blast_tf.translation.truncate();
+        let blast_half = blast_hitbox.size * 0.5;
+
+        for (entity, target_tf, target_hitbox, player, enemy) in target_query.iter() {
+            // Ignore entities that are neither Player nor Enemy
+            if player.is_none() && enemy.is_none() {
+                continue;
+            }
+
+            let target_pos = target_tf.translation.truncate();
+            let target_half = target_hitbox.size * 0.5;
+
+            let delta = blast_pos - target_pos;
+
+            let overlap_x = delta.x.abs() < (blast_half.x + target_half.x);
+            let overlap_y = delta.y.abs() < (blast_half.y + target_half.y);
+
+            if overlap_x && overlap_y {
+                if player.is_some() {
+                    println!("🔥 Player hit by blast");
+                } else if enemy.is_some() {
+                    println!("🔥 Enemy {:?} hit by blast", entity);
+                }
+            }
+        }
     }
 }
 
