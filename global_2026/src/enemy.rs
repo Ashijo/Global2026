@@ -1,8 +1,10 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 
+use crate::shared_comp::Hitbox;
+
 const ENEMY_VELOCITY: f32 = 400.0;
-const EPSILON: f32 = 15.0;
+const EPSILON: f32 = 5.0;
 
 pub fn enemy_setup(
     mut commands: Commands,
@@ -33,7 +35,10 @@ pub fn enemy_setup(
     transform.translation = Vec3::new(150.0, 70.0, 1.0);
 
     commands.spawn((
-        Enemy { target: None, id: 1 },
+        Enemy {
+            target: None,
+            id: 1,
+        },
         Sprite::from_atlas_image(
             texture.clone(),
             TextureAtlas {
@@ -44,10 +49,19 @@ pub fn enemy_setup(
         transform,
         animation_indices_1,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+        Hitbox {
+            min_x: -10.0,
+            min_y: -10.0,
+            max_x: 10.0,
+            max_y: 10.0,
+        },
     ));
 
     commands.spawn((
-        Enemy { target: None, id: 2 },
+        Enemy {
+            target: None,
+            id: 2,
+        },
         Sprite::from_atlas_image(
             texture.clone(),
             TextureAtlas {
@@ -58,10 +72,19 @@ pub fn enemy_setup(
         transform,
         animation_indices_2,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+        Hitbox {
+            min_x: -10.0,
+            min_y: -10.0,
+            max_x: 10.0,
+            max_y: 10.0,
+        },
     ));
 
     commands.spawn((
-        Enemy { target: None, id: 3 },
+        Enemy {
+            target: None,
+            id: 3,
+        },
         Sprite::from_atlas_image(
             texture.clone(),
             TextureAtlas {
@@ -72,6 +95,12 @@ pub fn enemy_setup(
         transform,
         animation_indices_3,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+        Hitbox {
+            min_x: -10.0,
+            min_y: -10.0,
+            max_x: 10.0,
+            max_y: 10.0,
+        },
     ));
 }
 
@@ -161,7 +190,7 @@ fn eps_y(target: &Target, trans: Transform, eps: f32) -> bool {
 #[derive(Component)]
 pub struct Enemy {
     target: Option<Target>,
-    id:u32
+    id: u32,
 }
 
 pub struct Target {
