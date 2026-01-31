@@ -21,11 +21,11 @@ pub struct BombFlash {
     pub white_texture: Handle<Image>,
 }
 
-pub fn item_setup() {
+pub fn bomb_setup() {
 //    println!("item setup")
 }
 
-pub fn item_update(
+pub fn bomb_update(
     mut commands: Commands,
     keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
@@ -97,7 +97,7 @@ pub fn item_update(
     }
 }
 
-pub fn item_fixed_update() {
+pub fn bomb_fixed_update() {
 //    println!("item fixed update")
 }
 
