@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::share::Hitbox;
 
 const SPEED: f32 = 300.0;
 
@@ -67,6 +68,12 @@ pub fn player_setup(
             },
         ),
         Transform::from_xyz(0.0, 0.0, 1.0),
+        Hitbox {
+            min_x: -10.0,
+            min_y: -10.0,
+            max_x: 10.0,
+            max_y: 10.0,
+        }
     ));
 }
 
