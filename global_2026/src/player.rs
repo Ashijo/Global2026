@@ -1,46 +1,143 @@
 use bevy::prelude::*;
-use bevy::window::WindowEvent::KeyboardInput;
-const SPEED:f32 = 300.0;
 
-pub fn player_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn((
-        Player,
-        Sprite {
-            custom_size: Some(Vec2::splat(25.)),
-            image: asset_server.load("test.png"),
-            ..default()
-        },
-        Transform::from_xyz(0.0, 0.0, 1.0),
-    ));
-}
-pub fn player_update(keys: Res<ButtonInput<KeyCode>>,
-                     mut query: Query<&mut Transform, With<Player>>,
-                     time:Res<Time>)  {
-    let mut direction = Vec2::ZERO;
-    if keys.pressed(KeyCode::KeyA){
-        direction.x -= 1.0;
-    }
-    if keys.pressed(KeyCode::KeyS){
-        direction.y -= 1.0;
-    }
-    if keys.pressed(KeyCode::KeyD){
-        direction.x += 1.0;
-    }
-    if keys.pressed(KeyCode::KeyW){
-        direction.y += 1.0;
-    }
-    if direction != Vec2::ZERO {
-        direction = direction.normalize();
-    }
-    let delta = time.delta_secs();
-    if let Ok(mut transform) = query.single_mut(){
-        transform.translation.x += direction.x * SPEED * delta;
-        transform.translation.y += direction.y * SPEED * delta;
-    }
-}
-pub fn player_fixed_update() {
-    println!("player fixed update")
-}
+const SPEED: f32 = 300.0;
+
+// Taille d'UNE frame de ton spritesheet
+const TILE_WIDTH: u32 = 278/4;
+const TILE_HEIGHT: u32 = 384/3;
+
+// Spritesheet : 4 colonnes (frames), 3 lignes (Down/Side/Up)
+const COLS: usize = 4;
+const ROWS: usize = 3;
+
+// Vitesse de l'animation (frames/sec)
+const ANIM_FPS: f32 = 10.0;
 
 #[derive(Component)]
 pub struct Player;
+
+#[derive(Component)]
+pub struct Anim {
+    first: usize,
+    last: usize,
+    timer: Timer,
+    playing: bool,
+}
+
+#[derive(Component, Clone, Copy)]
+pub enum Facing {
+    Down,
+    Side,
+    Up,
+}
+
+pub fn player_setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut layouts: ResMut<Assets<TextureAtlasLayout>>,
+) {
+    let texture: Handle<Image> = asset_server.load("img/bomberman-sprite-sheet.png");
+
+    // Découpe en grille (frame_w, frame_h, cols, rows)
+    let layout = TextureAtlasLayout::from_grid(
+        UVec2::new(TILE_WIDTH, TILE_HEIGHT),
+        COLS as u32,
+        ROWS as u32,
+        None,
+        None,
+    );
+    let layout_handle = layouts.add(layout);
+
+    let start_index = 0; // première frame de Down (ligne 0)
+
+    commands.spawn((
+        Player,
+        Facing::Down,
+        Anim {
+            first: 0,
+            last: COLS - 1, // frames 0..3 pour la ligne 0
+            timer: Timer::from_seconds(1.0 / ANIM_FPS, TimerMode::Repeating),
+            playing: false,
+        },
+        // ✅ Bevy 0.18 : sprite depuis atlas
+        Sprite::from_atlas_image(
+            texture,
+            TextureAtlas {
+                layout: layout_handle,
+                index: start_index,
+            },
+        ),
+        Transform::from_xyz(0.0, 0.0, 1.0),
+    ));
+}
+
+pub fn player_fixed_update(
+    keys: Res<ButtonInput<KeyCode>>,
+    time: Res<Time>,
+    mut q: Query<(&mut Transform, &mut Facing, &mut Anim, &mut Sprite), With<Player>>,
+) {
+    let Ok((mut tf, mut facing, mut anim, mut sprite)) = q.single_mut() else {
+        return; // 0 joueur ou >1 joueur
+    };
+
+    let mut dir = Vec2::ZERO;
+    if keys.pressed(KeyCode::KeyA) { dir.x -= 1.0; }
+    if keys.pressed(KeyCode::KeyD) { dir.x += 1.0; }
+    if keys.pressed(KeyCode::KeyS) { dir.y -= 1.0; }
+    if keys.pressed(KeyCode::KeyW) { dir.y += 1.0; }
+
+    if dir != Vec2::ZERO {
+        dir = dir.normalize();
+        anim.playing = true;
+
+        if dir.x.abs() > dir.y.abs() {
+            *facing = Facing::Side;
+            sprite.flip_x = dir.x < 0.0;
+        } else {
+            sprite.flip_x = false;
+            *facing = if dir.y > 0.0 { Facing::Up } else { Facing::Down };
+        }
+
+        let row = match *facing {
+            Facing::Up => 0,
+            Facing::Side => 1,
+            Facing::Down => 2,
+        };
+
+        anim.first = row * COLS;
+        anim.last = anim.first + (COLS - 1);
+    } else {
+        anim.playing = false;
+    }
+
+    let dt = time.delta_secs();
+    tf.translation.x += dir.x * SPEED * dt;
+    tf.translation.y += dir.y * SPEED * dt;
+}
+
+pub fn player_animation(
+    time: Res<Time>,
+    mut q: Query<(&mut Sprite, &mut Anim), With<Player>>,
+) {
+    let Ok((mut sprite, mut anim)) = q.single_mut() else {
+        return; // 0 joueur ou >1 joueur
+    };
+
+    let Some(atlas) = sprite.texture_atlas.as_mut() else {
+        return;
+    };
+
+    if !anim.playing {
+        atlas.index = anim.first;
+        return;
+    }
+
+    anim.timer.tick(time.delta());
+    if anim.timer.just_finished() {
+        atlas.index = if atlas.index >= anim.last { anim.first } else { atlas.index + 1 };
+    }
+}
+
+pub fn player_update() {
+
+}
