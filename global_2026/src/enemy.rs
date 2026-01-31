@@ -6,12 +6,20 @@ pub fn enemy_setup(
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let texture = asset_server.load("img/enemy.png");
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(13), 0, 3, None, None);
+
+    // from_grid define spritsheet division ( tile_size: UVec2,
+    //     columns: u32,
+    //     rows: u32,
+    //     padding: Option<UVec2>,
+    //     offset: Option<UVec2>)
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(16), 13, 1, Some(UVec2::splat(1)), Some(UVec2::splat(1)));
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
+
     // Use only the subset of sprites in the sheet that make up the run animation
-    let animation_indices = AnimationIndices { first: 1, last: 3 };
+    let animation_indices = AnimationIndices { first: 0, last: 2 };
 
     commands.spawn((
+        Enemy,
         Sprite::from_atlas_image(
             texture,
             TextureAtlas {
@@ -19,9 +27,9 @@ pub fn enemy_setup(
                 index: animation_indices.first,
             },
         ),
-        Transform::from_scale(Vec3::splat(6.0)),
+        Transform::from_scale(Vec3::splat(10.0)),
         animation_indices,
-        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+        AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
     ));
 
 }
