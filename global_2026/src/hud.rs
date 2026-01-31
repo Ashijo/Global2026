@@ -1,6 +1,10 @@
 use bevy::prelude::*;
 
+#[derive(Component)]
+pub struct ExitButton;
+
 pub fn hud_setup(mut commands: Commands) {
+    // Version text (bottom-right)
     commands.spawn((
         Text::new("Bomberdude 0.0.1"),
         TextFont {
@@ -15,10 +19,41 @@ pub fn hud_setup(mut commands: Commands) {
             ..default()
         },
     ));
+
+    // Exit button (just above the version text)
+    commands
+        .spawn((
+            Button,
+            ExitButton,
+            Node {
+                position_type: PositionType::Absolute,
+                top: Val::Px(10.0),
+                right: Val::Px(10.0),
+                padding: UiRect::all(Val::Px(6.0)),
+                ..default()
+            },
+            BackgroundColor(Color::srgb(0.2, 0.2, 0.2)),
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Text::new("Exit"),
+                TextFont {
+                    font_size: 16.0,
+                    ..default()
+                },
+                TextColor(Color::WHITE.into()),
+            ));
+        });
 }
-pub fn hud_update() {
-    //    println!("item update")
-}
-pub fn hud_fixed_update() {
-    //    println!("item fixed update")
+
+pub fn exit_button_system(
+    mut commands: Commands,
+    button_query: Query<&Interaction, (Changed<Interaction>, With<ExitButton>)>,
+) {
+    for interaction in &button_query {
+        if *interaction == Interaction::Pressed {
+            // Send the exit message via commands
+            commands.write_message(AppExit::Success);
+        }
+    }
 }
