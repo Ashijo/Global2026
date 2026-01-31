@@ -1,10 +1,19 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 
-use crate::shared_comp::Hitbox;
+use crate::collision::Hitbox;
 
 const ENEMY_VELOCITY: f32 = 400.0;
 const EPSILON: f32 = 5.0;
+
+pub struct EnemyPlugin;
+
+impl Plugin for EnemyPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, enemy_setup);
+        app.add_systems(FixedUpdate, enemy_fixed_update);
+    }
+}
 
 pub fn enemy_setup(
     mut commands: Commands,
@@ -50,10 +59,7 @@ pub fn enemy_setup(
         animation_indices_1,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
         Hitbox {
-            min_x: -10.0,
-            min_y: -10.0,
-            max_x: 10.0,
-            max_y: 10.0,
+            size: Vec2::splat(10.0)
         },
     ));
 
@@ -73,10 +79,7 @@ pub fn enemy_setup(
         animation_indices_2,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
         Hitbox {
-            min_x: -10.0,
-            min_y: -10.0,
-            max_x: 10.0,
-            max_y: 10.0,
+            size: Vec2::splat(10.0)
         },
     ));
 
@@ -96,10 +99,7 @@ pub fn enemy_setup(
         animation_indices_3,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
         Hitbox {
-            min_x: -10.0,
-            min_y: -10.0,
-            max_x: 10.0,
-            max_y: 10.0,
+            size: Vec2::splat(10.0)
         },
     ));
 }
@@ -109,7 +109,6 @@ pub fn enemy_update() {}
 pub fn enemy_fixed_update(
     time: Res<Time>,
     mut animation: Query<(&AnimationIndices, &mut AnimationTimer, &mut Sprite)>,
-    mut hitbox_query: Query<(&mut Enemy, &Transform, &Hitbox)>,
     mut enemy_query: Query<(&mut Enemy, &mut Transform)>,
 ) {
     for (indices, mut timer, mut sprite) in &mut animation {
@@ -126,14 +125,13 @@ pub fn enemy_fixed_update(
         }
     }
 
-    for (mut enemy, transform, hitbox) in &mut hitbox_query {
-
-    }
 
     for (mut enemy, mut transform) in &mut enemy_query {
         match &enemy.target {
             Some(value) => {
                 if !close_to_target(value, *transform, EPSILON) {
+
+
                     let mut dir = Vec2::ZERO;
 
                     if !eps_x(value, *transform, EPSILON) {
