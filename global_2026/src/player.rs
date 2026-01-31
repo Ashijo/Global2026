@@ -38,7 +38,7 @@ pub fn player_setup(
 ) {
     let texture: Handle<Image> = asset_server.load("img/bomberman-sprite-sheet.png");
 
-    // Découpe en grille (frame_w, frame_h, cols, rows)
+    // Découpage en grille (frame_w, frame_h, cols, rows)
     let layout = TextureAtlasLayout::from_grid(
         UVec2::new(TILE_WIDTH, TILE_HEIGHT),
         COLS as u32,
@@ -48,7 +48,7 @@ pub fn player_setup(
     );
     let layout_handle = layouts.add(layout);
 
-    let start_index = 0; // première frame de Down (ligne 0)
+    let start_index = 0; // première frame de Down
 
     commands.spawn((
         Player,
@@ -59,7 +59,6 @@ pub fn player_setup(
             timer: Timer::from_seconds(1.0 / ANIM_FPS, TimerMode::Repeating),
             playing: false,
         },
-        // ✅ Bevy 0.18 : sprite depuis atlas
         Sprite::from_atlas_image(
             texture,
             TextureAtlas {
@@ -77,7 +76,7 @@ pub fn player_fixed_update(
     mut q: Query<(&mut Transform, &mut Facing, &mut Anim, &mut Sprite), With<Player>>,
 ) {
     let Ok((mut tf, mut facing, mut anim, mut sprite)) = q.single_mut() else {
-        return; // 0 joueur ou >1 joueur
+        return;
     };
 
     let mut dir = Vec2::ZERO;
@@ -90,13 +89,25 @@ pub fn player_fixed_update(
         dir = dir.normalize();
         anim.playing = true;
 
-        if dir.x.abs() > dir.y.abs() {
+        let vertical = keys.pressed(KeyCode::KeyW) || keys.pressed(KeyCode::KeyS);
+        let horizontal = keys.pressed(KeyCode::KeyA) || keys.pressed(KeyCode::KeyD);
+
+        // On check dans quelle direction l'utilisateur veut aller
+        if vertical && !horizontal {
+            sprite.flip_x = false;
+            *facing = if dir.y > 0.0 { Facing::Up } else { Facing::Down };
+        } else if horizontal && !vertical {
             *facing = Facing::Side;
+        // flipper car notre sprite n'a que le déplacement à droite
             sprite.flip_x = dir.x < 0.0;
-        } else {
+        } else if vertical && horizontal {
+        // diagonale -> priorité verticale
             sprite.flip_x = false;
             *facing = if dir.y > 0.0 { Facing::Up } else { Facing::Down };
         }
+
+        // mémoriser l’ancienne ligne du sprite sheet pour détecter un changement de direction
+        let old_first = anim.first;
 
         let row = match *facing {
             Facing::Up => 0,
@@ -106,9 +117,18 @@ pub fn player_fixed_update(
 
         anim.first = row * COLS;
         anim.last = anim.first + (COLS - 1);
+
+        //raflaîchir pour changer immédiatement de direction si on change de direction
+        if anim.first != old_first {
+            if let Some(atlas) = sprite.texture_atlas.as_mut() {
+                atlas.index = anim.first;
+            }
+            anim.timer.reset();
+        }
     } else {
         anim.playing = false;
     }
+
 
     let dt = time.delta_secs();
     tf.translation.x += dir.x * SPEED * dt;
@@ -120,7 +140,7 @@ pub fn player_animation(
     mut q: Query<(&mut Sprite, &mut Anim), With<Player>>,
 ) {
     let Ok((mut sprite, mut anim)) = q.single_mut() else {
-        return; // 0 joueur ou >1 joueur
+        return;
     };
 
     let Some(atlas) = sprite.texture_atlas.as_mut() else {
