@@ -5,7 +5,6 @@ mod item;
 
 use bevy::prelude::*;
 use bevy::camera::ScalingMode;
-use bevy::ecs::component::ComponentCloneBehavior::Default;
 use bevy::prelude::OrthographicProjection;
 
 const WINDOW_WIDTH:f32 = 1920.0;
