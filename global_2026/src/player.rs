@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::share::Hitbox;
+use crate::shared_comp::Hitbox;
 
 const SPEED: f32 = 300.0;
 
