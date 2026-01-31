@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 
 pub fn player_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    println!("player setup");
     commands.spawn((
         Player,
         Sprite {
@@ -20,5 +19,4 @@ pub fn player_fixed_update() {
 }
 
 #[derive(Component)]
-
 struct Player;
