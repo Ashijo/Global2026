@@ -2548,6 +2548,7 @@ name = "global_2026"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "rand",
 ]
 
 [[package]]

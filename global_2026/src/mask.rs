@@ -1,7 +1,17 @@
 use bevy::prelude::*;
+use rand::prelude::*;
 
 #[derive(Component)]
 struct Mask;
+
+#[derive(Resource)]
+struct MaskSpawner {
+    timer: Timer,
+    max_masks: usize,
+    min: Vec2,
+    max: Vec2,
+    rng: ThreadRng, // random number generator
+}
 
 pub fn mask_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
