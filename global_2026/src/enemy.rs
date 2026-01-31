@@ -7,12 +7,18 @@ pub fn enemy_setup(
 ) {
     let texture = asset_server.load("img/enemy.png");
 
-    // from_grid define spritsheet division ( tile_size: UVec2,
+    // from_grid define spritesheet division ( tile_size: UVec2,
     //     columns: u32,
     //     rows: u32,
     //     padding: Option<UVec2>,
     //     offset: Option<UVec2>)
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(16), 13, 1, Some(UVec2::splat(1)), Some(UVec2::splat(1)));
+    let layout = TextureAtlasLayout::from_grid(
+        UVec2::splat(16),
+        13,
+        1,
+        Some(UVec2::splat(1)),
+        Some(UVec2::splat(1)),
+    );
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
     // Use only the subset of sprites in the sheet that make up the run animation
@@ -20,9 +26,8 @@ pub fn enemy_setup(
     let mut tr = Transform::from_scale(Vec3::splat(4.0));
     tr.translation = Vec3::new(150.0, 70.0, 1.0);
 
-
     commands.spawn((
-        Enemy,
+        Enemy { target: None },
         Sprite::from_atlas_image(
             texture,
             TextureAtlas {
@@ -34,11 +39,24 @@ pub fn enemy_setup(
         animation_indices,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
     ));
-
 }
-pub fn enemy_update() {
-
+pub fn enemy_update(mut query: Query<&mut Enemy>) {
+    for mut enemy in &mut query {
+        match &enemy.target {
+            Some(value) => {
+                println!("Value is present: {} : {}", value.x, value.y);
+            }
+            None => {
+                enemy.target = Some(Target {
+                    x: 50.0,
+                    y: 60.0
+                });
+                println!("Value is absent (None).");
+            }
+        }
+    }
 }
+
 pub fn enemy_fixed_update(
     time: Res<Time>,
     mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut Sprite)>,
@@ -56,11 +74,17 @@ pub fn enemy_fixed_update(
             };
         }
     }
-
 }
 
 #[derive(Component)]
-struct Enemy;
+pub struct Enemy {
+    target: Option<Target>,
+}
+
+pub struct Target {
+    x: f32,
+    y: f32,
+}
 
 #[derive(Component)]
 pub struct AnimationIndices {
@@ -70,4 +94,3 @@ pub struct AnimationIndices {
 
 #[derive(Component, Deref, DerefMut)]
 pub struct AnimationTimer(Timer);
-
