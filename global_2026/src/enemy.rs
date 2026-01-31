@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 
-const ENEMY_VELOCITY:f32 = 200.0;
+const ENEMY_VELOCITY:f32 = 400.0;
+const EPSILON:f32 = 15.0;
 
 pub fn enemy_setup(
     mut commands: Commands,
@@ -50,7 +51,7 @@ pub fn enemy_update() {
 pub fn enemy_fixed_update(
     time: Res<Time>,
     mut animation: Query<(&AnimationIndices, &mut AnimationTimer, &mut Sprite)>,
-    mut enemy: Query<(&mut Enemy, &mut Transform)>
+    mut enemy_query: Query<(&mut Enemy, &mut Transform)>
 ) {
     for (indices, mut timer, mut sprite) in &mut animation {
         timer.tick(time.delta());
@@ -66,10 +67,10 @@ pub fn enemy_fixed_update(
         }
     }
 
-    for (mut enemy, mut transform) in &mut enemy {
+    for (mut enemy, mut transform) in &mut enemy_query {
         match &enemy.target {
             Some(value) => {
-                if !close_to_target(value, *transform, Some(20.0)) {
+                if !close_to_target(value, *transform, EPSILON) {
                     let mut dir = Vec2::ZERO;
                     if value.x < transform.translation.x { dir.x -= 1.0; }
                     else if value.x > transform.translation.x { dir.x += 1.0; }
@@ -81,8 +82,14 @@ pub fn enemy_fixed_update(
                     }
 
                     let dt = time.delta_secs();
-                    transform.translation.x += dir.x * ENEMY_VELOCITY * dt;
-                    transform.translation.y += dir.y * ENEMY_VELOCITY * dt;
+
+                    if !eps_x(value, *transform, EPSILON) {
+                        transform.translation.x += dir.x * ENEMY_VELOCITY * dt;
+                    }
+
+                    if !eps_y(value, *transform, EPSILON) {
+                        transform.translation.y += dir.y * ENEMY_VELOCITY * dt;
+                    }
 
                 } else {
                     enemy.target = None;
@@ -106,15 +113,16 @@ pub fn enemy_fixed_update(
     }
 }
 
-fn close_to_target(target: &Target, trans: Transform, epsilon:Option<f32>) -> bool {
-    let eps:f32;
+fn close_to_target(target: &Target, trans: Transform, eps: f32) -> bool {
+    eps_x(target, trans, eps) && eps_y(target, trans, eps)
+}
 
-    match epsilon {
-        Some(value) => { eps = value; },
-        None => { eps = 1.0; }
-    }
+fn eps_x(target: &Target, trans: Transform, eps:f32) -> bool {
+    target.x + eps >= trans.translation.x && target.x - eps <= trans.translation.x
+}
 
-    return target.x + eps >= trans.translation.x && target.x - eps <= trans.translation.x && target.y + eps >= trans.translation.y && target.y - eps <= trans.translation.y;
+fn eps_y(target: &Target, trans: Transform, eps:f32) -> bool {
+    target.y + eps >= trans.translation.y && target.y - eps <= trans.translation.y
 }
 
 #[derive(Component)]
