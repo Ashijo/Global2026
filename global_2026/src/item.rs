@@ -13,7 +13,7 @@ pub struct BombTimer {
 }
 
 pub fn item_setup() {
-    println!("item setup")
+//    println!("item setup")
 }
 
 pub fn item_update(
@@ -50,6 +50,6 @@ pub fn item_update(
 }
 
 pub fn item_fixed_update() {
-    println!("item fixed update")
+//    println!("item fixed update")
 }
 
