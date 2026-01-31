@@ -2,7 +2,6 @@ mod map;
 mod player;
 mod enemy;
 mod item;
-mod constant;
 
 use bevy::prelude::*;
 use bevy::camera::ScalingMode;
