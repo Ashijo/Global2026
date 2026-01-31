@@ -2,6 +2,7 @@ mod map;
 mod player;
 mod enemy;
 mod item;
+mod constant;
 
 use bevy::prelude::*;
 use bevy::camera::ScalingMode;
@@ -23,6 +24,7 @@ fn main_setup(mut commands: Commands) {
     // Spawn a 2D camera
     commands.spawn((Camera2d,
                    Projection::Orthographic(OrthographicProjection {
+                       viewport_origin: Vec2::new(0.0, 0.0),
                        scaling_mode:ScalingMode::AutoMax {
                            max_width: WINDOW_WIDTH,
                            max_height: WINDOW_HEIGHT
