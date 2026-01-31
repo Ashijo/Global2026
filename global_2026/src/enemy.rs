@@ -90,11 +90,11 @@ pub fn enemy_fixed_update(
             },
             None => {
                 // Generate and shuffle a sequence:
-                let mut nums_h: Vec<u32> = (1..1920).collect();
-                let mut nums_v: Vec<u32> = (1..1080).collect();
+                let nums_h: Vec<u32> = (1..1920).collect();
+                let nums_v: Vec<u32> = (1..1080).collect();
                 let mut rng = rand::rng();
-                let mut new_x = nums_h.choose(&mut rng);
-                let mut new_y = nums_v.choose(&mut rng);
+                let new_x = nums_h.choose(&mut rng);
+                let new_y = nums_v.choose(&mut rng);
 
                 enemy.target = Some(Target {
                     x: *new_x.unwrap() as f32,
