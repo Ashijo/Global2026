@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::collision::Hitbox;
 
 const SPEED: f32 = 300.0;
 
@@ -67,6 +68,9 @@ pub fn player_setup(
             },
         ),
         Transform::from_xyz(0.0, 0.0, 1.0),
+        Hitbox {
+            size: Vec2::new(32.0, 32.0), // tweak if needed
+        },
     ));
 }
 
