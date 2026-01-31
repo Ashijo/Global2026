@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 use crate::player::Player;
+use crate::blast::spawn_blast;
 
 const BOMB_LIFETIME_SECS: f32 = 5.0;
-const BOMB_SIZE: f32 = 55.0;
-const BOMB_Z: f32 = 0.5;
+pub const BOMB_SIZE: f32 = 55.0;
+pub const BOMB_Z: f32 = 0.5;
 const FLASH_INTERVAL_SLOW: f32 = 0.6; // start slow
 const FLASH_INTERVAL_FAST: f32 = 0.05; // end fast
 
@@ -34,7 +35,7 @@ pub fn bomb_update(
     player_query: Query<&Transform, With<Player>>,
 
     bombs: Query<Entity, With<Bomb>>,
-    mut bomb_query: Query<(Entity, &mut BombTimer, &mut BombFlash, &mut Sprite)>,
+    mut bomb_query: Query<(Entity, &mut BombTimer, &mut BombFlash, &mut Sprite, &Transform)>,
 ) {
     // Spawn bomb under player if none exists
     if keys.just_pressed(KeyCode::Space) && bombs.is_empty() {
@@ -70,12 +71,13 @@ pub fn bomb_update(
     }
 
     //Update bombs timer and flashing
-    for (entity, mut bomb_timer, mut flash, mut sprite) in bomb_query.iter_mut() {
+    for (entity, mut bomb_timer, mut flash, mut sprite, &transform) in bomb_query.iter_mut() {
         // Advance bomb lifetime timer
         bomb_timer.timer.tick(time.delta());
 
         // Despawn bomb when timer finishes
         if bomb_timer.timer.just_finished() {
+            spawn_blast(&mut commands, &asset_server, transform.translation);
             commands.entity(entity).despawn();
             continue;
         }
