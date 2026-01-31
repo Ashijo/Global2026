@@ -3,7 +3,6 @@ mod player;
 mod enemy;
 mod item;
 mod hud;
-mod test;
 
 use bevy::prelude::*;
 use bevy::camera::ScalingMode;
