@@ -4,7 +4,7 @@ use rand::prelude::*;
 #[derive(Component)]
 struct Mask;
 
-#[derive(Resource)]
+/*"#[derive(Resource)]
 struct MaskSpawner {
     timer: Timer,
     max_masks: usize,
@@ -12,9 +12,9 @@ struct MaskSpawner {
     max: Vec2,
     rng: ThreadRng, // random number generator
 }
-
+*/
 pub fn mask_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn((
+/*    commands.spawn((
         Mask,
         Sprite {
             custom_size: Some(Vec2::splat(50.)),
@@ -23,6 +23,8 @@ pub fn mask_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         Transform::from_xyz(250.0, 250.0, 1.0),
     ));
+
+ */
 }
 
 pub fn mask_fixed_upgrade() {
