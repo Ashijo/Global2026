@@ -13,4 +13,3 @@ fn main() {
         .add_systems(FixedUpdate, (map::map_fixed_update,enemy::enemy_fixed_update,item::item_fixed_update, player::player_fixed_update))
         .run();
 }
-
