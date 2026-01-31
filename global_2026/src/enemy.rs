@@ -109,6 +109,7 @@ pub fn enemy_update() {}
 pub fn enemy_fixed_update(
     time: Res<Time>,
     mut animation: Query<(&AnimationIndices, &mut AnimationTimer, &mut Sprite)>,
+    mut hitbox_query: Query<(&mut Enemy, &Transform, &Hitbox)>,
     mut enemy_query: Query<(&mut Enemy, &mut Transform)>,
 ) {
     for (indices, mut timer, mut sprite) in &mut animation {
@@ -123,6 +124,10 @@ pub fn enemy_fixed_update(
                 atlas.index + 1
             };
         }
+    }
+
+    for (mut enemy, transform, hitbox) in &mut hitbox_query {
+
     }
 
     for (mut enemy, mut transform) in &mut enemy_query {
