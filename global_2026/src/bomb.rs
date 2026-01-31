@@ -3,7 +3,7 @@ use crate::player::Player;
 
 const BOMB_LIFETIME_SECS: f32 = 5.0;
 const BOMB_SIZE: f32 = 55.0;
-const BOMB_Z: f32 = 3.0;
+const BOMB_Z: f32 = 0.5;
 const FLASH_INTERVAL_SLOW: f32 = 0.6; // start slow
 const FLASH_INTERVAL_FAST: f32 = 0.05; // end fast
 
@@ -31,21 +31,18 @@ pub fn item_update(
     time: Res<Time>,
     asset_server: Res<AssetServer>,
 
-    // Player query (assume only one)
     player_query: Query<&Transform, With<Player>>,
 
-    // Bomb query
     bombs: Query<Entity, With<Bomb>>,
     mut bomb_query: Query<(Entity, &mut BombTimer, &mut BombFlash, &mut Sprite)>,
 ) {
-    // ── Spawn bomb under player if none exists ───────────────
+    // Spawn bomb under player if none exists
     if keys.just_pressed(KeyCode::Space) && bombs.is_empty() {
         let player_transform = match player_query.iter().next() {
             Some(transform) => transform,
             None => return,
         };
 
-        // Load textures
         let normal_texture = asset_server.load("img/bomb.png");
         let white_texture = asset_server.load("img/bomb_white.png");
 
@@ -72,7 +69,7 @@ pub fn item_update(
         ));
     }
 
-    // ── Update bombs (timer + flashing) ──────────────────────
+    //Update bombs timer and flashing
     for (entity, mut bomb_timer, mut flash, mut sprite) in bomb_query.iter_mut() {
         // Advance bomb lifetime timer
         bomb_timer.timer.tick(time.delta());
@@ -83,16 +80,13 @@ pub fn item_update(
             continue;
         }
 
-        // Optional: speed up flashing as bomb nears end of lifetime
         let remaining = bomb_timer.timer.remaining_secs();
         let progress = (remaining / BOMB_LIFETIME_SECS).clamp(0.0, 1.0);
         let flash_interval = FLASH_INTERVAL_FAST + (FLASH_INTERVAL_SLOW - FLASH_INTERVAL_FAST) * progress;
         flash.flash_timer.set_duration(std::time::Duration::from_secs_f32(flash_interval));
 
-        // Tick flash timer
         flash.flash_timer.tick(time.delta());
 
-        // Swap textures when flash timer finishes
         if flash.flash_timer.just_finished() {
             sprite.image = if sprite.image == flash.normal_texture {
                 flash.white_texture.clone()
