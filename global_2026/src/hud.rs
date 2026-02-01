@@ -1,11 +1,14 @@
 use bevy::prelude::*;
 use crate::GameState;
+use crate::unmasked::UnmaskedScore;
 
 #[derive(Component)]
 pub struct ExitButton;
 
 #[derive(Component)]
 pub struct RestartButton;
+#[derive(Component)]
+pub struct ScoreText;
 
 pub fn hud_setup(mut commands: Commands) {
     commands.spawn((
@@ -36,7 +39,7 @@ pub fn hud_setup(mut commands: Commands) {
             left: Val::Px(10.0),
             ..default()
         },
-    ));
+    )).insert(ScoreText);
 
     commands.spawn((
         Text::new("Truth Bombs:5"),
@@ -118,5 +121,18 @@ pub fn hud_update(
                 next_state.set(GameState::Restart);
             }
         }
+    }
+}
+
+pub fn hud_score_update(
+    score: Res<UnmaskedScore>,
+    mut query: Query<&mut Text, With<ScoreText>>,
+) {
+    if !score.is_changed() {
+        return;
+    }
+
+    for mut text in &mut query {
+        text.0 = format!("Unmasked: {}", score.0);
     }
 }

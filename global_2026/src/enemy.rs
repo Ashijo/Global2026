@@ -7,6 +7,7 @@ use crate::GameState;
 use crate::level::LevelEntity;
 use crate::stunned::Stunned;
 use crate::player::{Player, HasMask};
+use crate::unmasked::UnmaskedScore;
 
 const ENEMY_VELOCITY: f32 = 320.0;
 const EPSILON: f32 = 5.0;
@@ -218,8 +219,8 @@ fn collide_player(
     enemy_query: Query<(Entity, &Transform, &Hitbox, Option<&Stunned>), With<Enemy>>,
     player_transform: Single<&Transform, With<Player>>,
     player_hitbox: Single<&Hitbox, With<Player>>,
-    player_mask: Single<&HasMask, With<Player>>,
     mut next_state: ResMut<NextState<GameState>>,
+    mut unmasked_score: ResMut<UnmaskedScore>,
 ) {
     let mut kill = false;
 
@@ -242,18 +243,15 @@ fn collide_player(
         let y_overlap = p_min_y < en_max_y && p_max_y > en_min_y;
 
         if x_overlap && y_overlap {
-            if stunned.is_some() || player_mask.0 {
-                // Enemy is stunned OR player has mask → despawn enemy
+            if stunned.is_some() {
                 commands.entity(enemy_entity).despawn();
-                if player_mask.0 {
-                    println!("💀 Enemy killed by masked player!");
-                } else {
-                    println!("💀 Enemy killed while stunned!");
-                }
+                unmasked_score.0 += 1; // increment score
+                println!("💀 Enemy killed while stunned!");
             } else {
                 kill = true;
             }
-        }    }
+        }
+    }
 
     if kill {
         if cfg!(debug_assertions) {
