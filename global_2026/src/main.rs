@@ -1,6 +1,7 @@
 mod map;
 mod player;
 mod enemy;
+mod gizmos;
 mod bomb;
 mod hud;
 mod mask;
@@ -14,6 +15,7 @@ use bevy::camera::ScalingMode;
 use bevy::prelude::OrthographicProjection;
 use crate::enemy::EnemyPlugin;
 use crate::player::PlayerPlugin;
+use crate::gizmos::GizmosPlugin;
 
 use crate::level::LevelEntity;
 use crate::level::despawn_entities;
@@ -34,6 +36,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins(EnemyPlugin)
         .add_plugins(PlayerPlugin)
+        .add_plugins(GizmosPlugin)
         .init_state::<GameState>()
         .add_systems(OnEnter(GameState::Restart), (restart_game, player::player_setup, enemy::enemy_setup))
         .add_systems(Startup, (main_setup, map::map_setup,bomb::bomb_setup, hud::hud_setup, mask::mask_setup))
