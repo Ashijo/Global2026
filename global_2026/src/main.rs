@@ -11,6 +11,7 @@ mod level;
 use bevy::prelude::*;
 use bevy::camera::ScalingMode;
 use bevy::prelude::OrthographicProjection;
+use crate::enemy::EnemyPlugin;
 
 use crate::level::LevelEntity;
 use crate::level::despawn_entities;
@@ -28,11 +29,12 @@ enum GameState {
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugins(EnemyPlugin)
         .init_state::<GameState>()
         .add_systems(OnEnter(GameState::GameOver), restart_game)
-        .add_systems(Startup, (main_setup, map::map_setup,enemy::enemy_setup,bomb::bomb_setup, player::player_setup, hud::hud_setup, mask::mask_setup))
-        .add_systems(Update, (map::map_update,enemy::enemy_update,bomb::bomb_update, player::player_update, blast::blast_update, hud::hud_update))
-        .add_systems(FixedUpdate, (map::map_fixed_update,enemy::enemy_fixed_update,bomb::bomb_fixed_update, player::player_fixed_update, player::player_animation, mask::spawn_masks, blast::blast_collision_system,).chain())
+        .add_systems(Startup, (main_setup, map::map_setup,bomb::bomb_setup, player::player_setup, hud::hud_setup, mask::mask_setup))
+        .add_systems(Update, (map::map_update,bomb::bomb_update, player::player_update, blast::blast_update, hud::hud_update))
+        .add_systems(FixedUpdate, (map::map_fixed_update,bomb::bomb_fixed_update, player::player_fixed_update, player::player_animation, mask::spawn_masks, blast::blast_collision_system,).chain())
         .run();
 }
 

@@ -1,10 +1,21 @@
-use bevy::prelude::*;
+use bevy::{color::palettes::css::*, prelude::*} ;
+use bevy::prelude::Gizmo;
 use rand::prelude::*;
 
 use crate::collision::Hitbox;
+use crate::player::Player;
 
 const ENEMY_VELOCITY: f32 = 400.0;
 const EPSILON: f32 = 5.0;
+
+pub struct EnemyPlugin;
+
+impl Plugin for EnemyPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, enemy_setup);
+        app.add_systems(FixedUpdate, (enemy_fixed_update, collide_player, gizmo_hitbox));
+    }
+}
 
 pub fn enemy_setup(
     mut commands: Commands,
@@ -49,7 +60,9 @@ pub fn enemy_setup(
         transform,
         animation_indices_1,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
-        Hitbox {size: Vec2::new(32.0, 32.0)},
+        Hitbox {
+            size: Vec2::splat(64.0)
+        },
     ));
 
     commands.spawn((
@@ -67,7 +80,9 @@ pub fn enemy_setup(
         transform,
         animation_indices_2,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
-        Hitbox {size: Vec2::new(32.0, 32.0)},
+        Hitbox {
+            size: Vec2::splat(64.0)
+        },
     ));
 
     commands.spawn((
@@ -85,7 +100,9 @@ pub fn enemy_setup(
         transform,
         animation_indices_3,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
-        Hitbox {size: Vec2::new(32.0, 32.0)},
+        Hitbox {
+            size: Vec2::splat(64.0)
+        },
     ));
 }
 
@@ -110,10 +127,13 @@ pub fn enemy_fixed_update(
         }
     }
 
+
     for (mut enemy, mut transform) in &mut enemy_query {
         match &enemy.target {
             Some(value) => {
                 if !close_to_target(value, *transform, EPSILON) {
+
+
                     let mut dir = Vec2::ZERO;
 
                     if !eps_x(value, *transform, EPSILON) {
@@ -157,6 +177,52 @@ pub fn enemy_fixed_update(
                 });
             }
         }
+    }
+}
+
+fn gizmo_hitbox(
+    mut gizmos: Gizmos,
+    mut hitbox_query: Query<(&Hitbox, &Transform)>
+) {
+    for (hitbox, transform) in &hitbox_query {
+        let min_x = transform.translation.x - hitbox.size.x / 2.0;
+        let max_x = transform.translation.x + hitbox.size.x / 2.0;
+        let min_y = transform.translation.y - hitbox.size.y / 2.0;
+        let max_y = transform.translation.y + hitbox.size.y / 2.0;
+
+        gizmos.line_2d(Vec2::new(min_x, min_y), Vec2::new(min_x, max_y), RED);
+        gizmos.line_2d(Vec2::new(min_x, min_y), Vec2::new(max_x, min_y), RED);
+        gizmos.line_2d(Vec2::new(max_x, max_y), Vec2::new(min_x, max_y), RED);
+        gizmos.line_2d(Vec2::new(max_x, max_y), Vec2::new(max_x, min_y), RED);
+    }
+}
+
+fn collide_player(
+    mut enemy_query: Query<(&Transform, &Hitbox), With<Enemy>>,
+    mut player_transform: Single<&Transform, With<Player>>,
+    mut player_hitbox: Single<&Hitbox, With<Player>>,
+) {
+    let mut kill = false;
+
+    let p_min_x = player_transform.translation.x - player_hitbox.size.x / 2.0;
+    let p_max_x = player_transform.translation.x + player_hitbox.size.x / 2.0;
+    let p_min_y = player_transform.translation.y - player_hitbox.size.y / 2.0;
+    let p_max_y = player_transform.translation.y + player_hitbox.size.y / 2.0;
+
+    for (en_trans, hitbox) in &enemy_query {
+        let en_min_x = en_trans.translation.x - hitbox.size.x / 2.0;
+        let en_max_x = en_trans.translation.x + hitbox.size.x / 2.0;
+        let en_min_y = en_trans.translation.y - hitbox.size.y / 2.0;
+        let en_max_y = en_trans.translation.y + hitbox.size.y / 2.0;
+
+        let x_overlap = p_min_x < en_max_x && p_max_x > en_min_x;
+        let y_overlap = p_min_y < en_max_y && p_max_y > en_min_y;
+
+        kill = x_overlap && y_overlap;
+    }
+
+    if kill {
+        println!("DEAD !!!");
     }
 }
 
