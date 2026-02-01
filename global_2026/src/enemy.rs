@@ -37,8 +37,7 @@ pub fn enemy_setup(
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
-    let texture = asset_server.load("img/enemy.png");
-    let cop_texture = asset_server.load("img/cop_2.png");
+    let texture = asset_server.load("img/cop_2.png");
 
     // from_grid define spritesheet division ( tile_size: UVec2,
     //     columns: u32,
@@ -46,14 +45,6 @@ pub fn enemy_setup(
     //     padding: Option<UVec2>,
     //     offset: Option<UVec2>)
     let layout = TextureAtlasLayout::from_grid(
-        UVec2::splat(16),
-        13,
-        1,
-        Some(UVec2::splat(1)),
-        Some(UVec2::splat(1)),
-    );
-
-    let cop_layout = TextureAtlasLayout::from_grid(
         UVec2 {  
             x: 49,
             y: 65
@@ -65,16 +56,15 @@ pub fn enemy_setup(
     );
 
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
-    let cop_texture_atlas_layout = texture_atlas_layouts.add(cop_layout);
 
     // Use only the subset of sprites in the sheet that make up the run animation
     let animation_indices_1 = AnimationIndices { first: 0, last: 8 };
-    let animation_indices_2 = AnimationIndices { first: 3, last: 5 };
-    let animation_indices_3 = AnimationIndices { first: 6, last: 8 };
+    let animation_indices_2 = AnimationIndices { first: 0, last: 8 };
+    let animation_indices_3 = AnimationIndices { first: 0, last: 8 };
 
     let mut transform_1 = Transform::from_scale(Vec3::splat(1.0));
-    let mut transform_2 = Transform::from_scale(Vec3::splat(4.0));
-    let mut transform_3 = Transform::from_scale(Vec3::splat(4.0));
+    let mut transform_2 = Transform::from_scale(Vec3::splat(1.0));
+    let mut transform_3 = Transform::from_scale(Vec3::splat(1.0));
 
     transform_1.translation = Vec3::new(1750.0, 100.0, 1.0);
     transform_2.translation = Vec3::new(1750.0, 500.0, 1.0);
@@ -86,13 +76,13 @@ pub fn enemy_setup(
             Sprite::from_atlas_image(
                 texture.clone(),
                 TextureAtlas {
-                    layout: cop_texture_atlas_layout.clone(),
+                    layout: texture_atlas_layout.clone(),
                     index: animation_indices_1.first,
                 },
             ),
             transform_1,
             animation_indices_1,
-            AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+            AnimationTimer(Timer::from_seconds(0.2, TimerMode::Repeating)),
             Hitbox {
                 size: Vec2::splat(64.0),
                 offset: Vec2::ZERO,
@@ -118,7 +108,7 @@ pub fn enemy_setup(
             ),
             transform_2,
             animation_indices_2,
-            AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+            AnimationTimer(Timer::from_seconds(0.2, TimerMode::Repeating)),
             Hitbox {
                 size: Vec2::splat(64.0),
                 offset: Vec2::ZERO,
@@ -144,7 +134,7 @@ pub fn enemy_setup(
             ),
             transform_3,
             animation_indices_3,
-            AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+            AnimationTimer(Timer::from_seconds(0.2, TimerMode::Repeating)),
             Hitbox {
                 size: Vec2::splat(64.0),
                 offset: Vec2::ZERO,
