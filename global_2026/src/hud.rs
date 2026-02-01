@@ -8,7 +8,6 @@ pub struct ExitButton;
 pub struct RestartButton;
 
 pub fn hud_setup(mut commands: Commands) {
-    // Version text (bottom-right)
     commands.spawn((
         Text::new("Bomberdude 0.0.1"),
         TextFont {
@@ -20,6 +19,36 @@ pub fn hud_setup(mut commands: Commands) {
             position_type: PositionType::Absolute,
             bottom: Val::Px(10.0),
             right: Val::Px(10.0),
+            ..default()
+        },
+    ));
+
+    commands.spawn((
+        Text::new("Unmasked:0"),
+        TextFont {
+            font_size: 20.0,
+            ..default()
+        },
+        TextColor(Color::WHITE.into()),
+        Node {
+            position_type: PositionType::Absolute,
+            top: Val::Px(10.0),
+            left: Val::Px(10.0),
+            ..default()
+        },
+    ));
+
+    commands.spawn((
+        Text::new("Truth Bombs:5"),
+        TextFont {
+            font_size: 20.0,
+            ..default()
+        },
+        TextColor(Color::WHITE.into()),
+        Node {
+            position_type: PositionType::Absolute,
+            top: Val::Px(40.0),
+            left: Val::Px(10.0),
             ..default()
         },
     ));
