@@ -9,6 +9,7 @@ mod blast;
 mod collision;
 mod level;
 mod stunned;
+mod unmasked;
 
 use bevy::prelude::*;
 use bevy::camera::ScalingMode;
@@ -16,6 +17,7 @@ use bevy::prelude::OrthographicProjection;
 use crate::enemy::EnemyPlugin;
 use crate::player::PlayerPlugin;
 use crate::gizmos::GizmosPlugin;
+use crate::unmasked::UnmaskedScore;
 
 use crate::level::LevelEntity;
 use crate::level::despawn_entities;
@@ -38,9 +40,10 @@ fn main() {
         .add_plugins(PlayerPlugin)
         .add_plugins(GizmosPlugin)
         .init_state::<GameState>()
+        .insert_resource(UnmaskedScore::default())
         .add_systems(OnEnter(GameState::Restart), (restart_game, player::player_setup, enemy::enemy_setup))
         .add_systems(Startup, (main_setup, map::map_setup,bomb::bomb_setup, hud::hud_setup, mask::mask_setup))
-        .add_systems(Update, (bomb::bomb_update, blast::blast_update, hud::hud_update))
+        .add_systems(Update, (bomb::bomb_update, blast::blast_update, hud::hud_update, hud::hud_score_update))
         .add_systems(FixedUpdate, (bomb::bomb_fixed_update,
                                    mask::spawn_masks,
                                    blast::blast_collision_system, 

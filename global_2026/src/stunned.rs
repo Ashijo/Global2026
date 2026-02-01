@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-pub const STUN_DURATION: f32 = 1.0;
+pub const STUN_DURATION: f32 = 2.0;
 
 #[derive(Component)]
 pub struct Stunned {
