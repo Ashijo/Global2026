@@ -202,7 +202,7 @@ fn enemy_movement(
             }
         } else {
             commands.entity(entity).remove::<Target>();
-            
+
             let mut rng = rand::thread_rng();
             let fuse_time = TARGET_FUSE_TIME.choose(&mut rng).unwrap();
 
@@ -261,8 +261,16 @@ fn detect_player(
     mut chasing_query: Query<Entity, (With<Enemy>, With<Target>)>,
 ) {
     if player_has_mask.0 {
+        let mut rng = rand::thread_rng();
+
         for e in &chasing_query {
-             commands.entity(e).remove::<Target>();
+            commands.entity(e).remove::<Target>();
+
+            let fuse_time = TARGET_FUSE_TIME.choose(&mut rng).unwrap();
+
+            commands.entity(e).insert(FuseTime{
+                timer: Timer::new(Duration::from_secs(*fuse_time), TimerMode::Once),
+            });
         }
         return;
     }
