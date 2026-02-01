@@ -23,6 +23,7 @@ pub fn hud_setup(mut commands: Commands) {
         },
     ));
 
+    /**
     commands.spawn((
         Text::new("Unmasked:0"),
         TextFont {
@@ -38,6 +39,7 @@ pub fn hud_setup(mut commands: Commands) {
         },
     ));
 
+
     commands.spawn((
         Text::new("Truth Bombs:5"),
         TextFont {
@@ -52,7 +54,8 @@ pub fn hud_setup(mut commands: Commands) {
             ..default()
         },
     ));
-
+    **/
+    
     // Exit Button
     commands
         .spawn((
