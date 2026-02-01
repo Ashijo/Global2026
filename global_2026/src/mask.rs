@@ -4,6 +4,8 @@ use crate::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use crate::collision::Hitbox;
 use crate::level::LevelEntity;
 
+const BORDER_SIZE: f32 = 100.0;
+
 //rng = random number generation
 #[derive(Component)]
 pub struct Mask;
@@ -20,8 +22,8 @@ pub fn mask_setup(mut commands: Commands) {
     commands.insert_resource(MaskSpawner {
         timer: Timer::from_seconds(15.0, TimerMode::Repeating),
         max_masks: 3,
-        min: Vec2::new(0.0, 0.0),
-        max: Vec2::new(WINDOW_WIDTH, WINDOW_HEIGHT),
+        min: Vec2::new(BORDER_SIZE, BORDER_SIZE),
+        max: Vec2::new(WINDOW_WIDTH - BORDER_SIZE, WINDOW_HEIGHT - BORDER_SIZE),
     });
 }
 pub fn spawn_masks(mut commands: Commands,

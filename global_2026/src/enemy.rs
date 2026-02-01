@@ -10,7 +10,7 @@ use crate::player::{Player, HasMask};
 
 const ENEMY_VELOCITY: f32 = 320.0;
 const EPSILON: f32 = 5.0;
-const TARGET_FUSE_TIME:[i32; 4] = [3,4,5,6];
+const TARGET_FUSE_TIME:[u64; 4] = [1,3,5,6];
 
 pub struct EnemyPlugin;
 
@@ -193,7 +193,6 @@ fn enemy_movement(
                 }
             }
 
-
             if dir != Vec2::ZERO {
                 dir = dir.normalize();
                 let dt = time.delta_secs();
@@ -203,8 +202,12 @@ fn enemy_movement(
             }
         } else {
             commands.entity(entity).remove::<Target>();
+            
+            let mut rng = rand::thread_rng();
+            let fuse_time = TARGET_FUSE_TIME.choose(&mut rng).unwrap();
+
             commands.entity(entity).insert(FuseTime{
-                timer: Timer::new(Duration::from_secs(2), TimerMode::Once),
+                timer: Timer::new(Duration::from_secs(*fuse_time), TimerMode::Once),
             });
         }
     }
@@ -254,7 +257,7 @@ fn detect_player(
     mut commands: Commands,
     player_transform: Single<&Transform, With<Player>>,
     player_has_mask: Single<&HasMask, With<Player>>,
-    mut enemy_query: Query<(Entity, &Transform, &Detection), (Without<Target>, With<Enemy>)>,
+    mut enemy_query: Query<(Entity, &Transform, &Detection, Option<&Target>), (With<Enemy>)>,
     mut chasing_query: Query<Entity, (With<Enemy>, With<Target>)>,
 ) {
     if player_has_mask.0 {
@@ -263,7 +266,7 @@ fn detect_player(
         }
         return;
     }
-    for (entity, en_trans, detection) in &mut enemy_query {
+    for (entity, en_trans, detection, target) in &mut enemy_query {
         let en_min_x = en_trans.translation.x - detection.size.x / 2.0;
         let en_max_x = en_trans.translation.x + detection.size.x / 2.0;
         let en_min_y = en_trans.translation.y - detection.size.y / 2.0;
@@ -277,6 +280,10 @@ fn detect_player(
         let detect = x_overlap && y_overlap;
 
         if detect {
+            if target.is_some() {
+                commands.entity(entity).remove::<Target>();
+            }
+
             commands.entity(entity).insert(Target{
                 pos: Vec2::new(player_transform.translation.x, player_transform.translation.y),
             });
@@ -292,17 +299,14 @@ fn random_target_spawner(
     for (entity, mut fuse_timer) in enemy_query.iter_mut() {
         fuse_timer.timer.tick(time.delta());
 
-
         if fuse_timer.timer.just_finished() {
             let mut rng = rand::thread_rng();
-            
             let target = Target{
                 pos: Vec2{
                     x: rng.gen_range(100.0..1800.0),
                     y: rng.gen_range(100.0..800.0)
                 }
             };
-
 
             commands.entity(entity).insert(target);
             commands.entity(entity).remove::<FuseTime>();
