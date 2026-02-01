@@ -17,6 +17,15 @@ const ROWS: usize = 3;
 // Vitesse de l'animation (frames/sec)
 const ANIM_FPS: f32 = 10.0;
 
+
+const WINDOW_WIDTH:f32 = 1920.0;
+const WINDOW_HEIGHT:f32 = 1080.0;
+
+const MAX_BOTTOM: f32 = 100.0;
+const MAX_TOP: f32 = 100.0;
+const MAX_LEFT: f32 = 100.0;
+const MAX_RIGHT: f32 = 100.0;
+
 #[derive(Component)]
 pub struct Player;
 
@@ -120,10 +129,17 @@ pub fn player_fixed_update(
     }
 
     let mut dir = Vec2::ZERO;
-    if keys.pressed(KeyCode::KeyA) { dir.x -= 1.0; }
-    if keys.pressed(KeyCode::KeyD) { dir.x += 1.0; }
-    if keys.pressed(KeyCode::KeyS) { dir.y -= 1.0; }
-    if keys.pressed(KeyCode::KeyW) { dir.y += 1.0; }
+
+    let max_left_reached = tf.translation.x <= MAX_LEFT;
+    let max_right_reached = tf.translation.x >= WINDOW_WIDTH - MAX_RIGHT;
+    let max_top_reached = tf.translation.y >= WINDOW_HEIGHT - MAX_TOP;
+    let max_bottom_reached = tf.translation.y <= MAX_BOTTOM;
+
+
+    if keys.pressed(KeyCode::KeyA) && !max_left_reached { dir.x -= 1.0; }
+    if keys.pressed(KeyCode::KeyD) && !max_right_reached { dir.x += 1.0; }
+    if keys.pressed(KeyCode::KeyS) && !max_bottom_reached { dir.y -= 1.0; }
+    if keys.pressed(KeyCode::KeyW) && !max_top_reached { dir.y += 1.0; }
 
     if dir != Vec2::ZERO {
         dir = dir.normalize();
