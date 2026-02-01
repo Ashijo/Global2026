@@ -18,13 +18,5 @@ pub fn map_setup(
     ));
 }
 
-pub fn map_update() {
-    //println!("map update")
-}
-
-pub fn map_fixed_update() {
-    //println!("map fixed update")
-}
-
 #[derive(Component)]
 pub struct Map;
