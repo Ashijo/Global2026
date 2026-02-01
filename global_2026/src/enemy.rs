@@ -9,7 +9,7 @@ use crate::player::{Player, HasMask};
 
 const ENEMY_VELOCITY: f32 = 320.0;
 const EPSILON: f32 = 5.0;
-const TARGET_FUSE_TIME:[i32; 4] = [3,4,5,6];
+const TARGET_FUSE_TIME:[u64; 4] = [1,3,5,6];
 
 pub struct EnemyPlugin;
 
@@ -192,7 +192,6 @@ fn enemy_movement(
                 }
             }
 
-
             if dir != Vec2::ZERO {
                 dir = dir.normalize();
                 let dt = time.delta_secs();
@@ -202,8 +201,12 @@ fn enemy_movement(
             }
         } else {
             commands.entity(entity).remove::<Target>();
+
+            let mut rng = rand::thread_rng();
+            let fuse_time = TARGET_FUSE_TIME.choose(&mut rng).unwrap();
+
             commands.entity(entity).insert(FuseTime{
-                timer: Timer::new(Duration::from_secs(2), TimerMode::Once),
+                timer: Timer::new(Duration::from_secs(*fuse_time), TimerMode::Once),
             });
         }
     }
@@ -284,17 +287,14 @@ fn random_target_spawner(
     for (entity, mut fuse_timer) in enemy_query.iter_mut() {
         fuse_timer.timer.tick(time.delta());
 
-
         if fuse_timer.timer.just_finished() {
             let mut rng = rand::thread_rng();
-            
             let target = Target{
                 pos: Vec2{
                     x: rng.gen_range(100.0..1800.0),
                     y: rng.gen_range(100.0..800.0)
                 }
             };
-
 
             commands.entity(entity).insert(target);
             commands.entity(entity).remove::<FuseTime>();
