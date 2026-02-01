@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::GameState;
 
 #[derive(Component)]
 pub struct ExitButton;
@@ -76,6 +77,7 @@ pub fn hud_setup(mut commands: Commands) {
 
 pub fn hud_update(
     mut commands: Commands,
+    mut next_state: ResMut<NextState<GameState>>,
     query: Query<(&Interaction, Option<&RestartButton>, Option<&ExitButton>), Changed<Interaction>>,
 ) {
     for (interaction, restart, exit) in &query {
@@ -84,8 +86,7 @@ pub fn hud_update(
                 commands.write_message(AppExit::Success);
             }
             if restart.is_some() {
-                //next_state.set(GameState::GameOver);
-                println!("Restart button pressed!");
+                next_state.set(GameState::Restart);
             }
         }
     }

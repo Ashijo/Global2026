@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use rand::RngExt;
 use crate::{WINDOW_HEIGHT, WINDOW_WIDTH};
+use crate::level::LevelEntity;
 
 //rng = random number generation
 #[derive(Component)]
@@ -45,5 +46,5 @@ pub fn spawn_masks(mut commands: Commands,
             ..default()
         },
         Transform::from_xyz(x, y, 0.0),
-    ));
+    )).insert(LevelEntity);
 }
