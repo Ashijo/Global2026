@@ -14,7 +14,7 @@ pub fn hud_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font: Handle<Font> = asset_server.load("fonts/NotoSansSymbols2-Regular.ttf");
 
     commands.spawn((
-        Text::new("Bomberdude 0.0.1"),
+        Text::new("Truth Bomber 1.0.0"),
         TextFont {
             font_size: 20.0,
             ..default()
