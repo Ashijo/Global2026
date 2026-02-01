@@ -6,6 +6,9 @@ pub struct GizmosPlugin;
 
 impl Plugin for GizmosPlugin {
     fn build(&self, app: &mut App) {
+        if !cfg!(debug_assertions) {
+            return;
+        }
         app.add_systems(
             FixedUpdate,
             (
@@ -30,8 +33,6 @@ fn gizmo_hitbox(mut gizmos: Gizmos, hitbox_query: Query<(&Hitbox, &Transform)>) 
         gizmos.line_2d(Vec2::new(max_x, max_y), Vec2::new(max_x, min_y), RED);
     }
 }
-
-
 
 fn gizmo_detection(mut gizmos: Gizmos, detection_query: Query<(&Detection, &Transform)>) {
     for (detection, transform) in &detection_query {
