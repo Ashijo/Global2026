@@ -19,7 +19,7 @@ pub struct BlastTimer {
 
 // spawn blast centered around bomb
 pub fn spawn_blast(commands: &mut Commands, asset_server: &Res<AssetServer>, center: Vec3) {
-    let blast_texture = asset_server.load("img/bomb.png");
+    let blast_texture = asset_server.load("img/bomb_2.png");
 
     //spawn center blast
     commands.spawn((
