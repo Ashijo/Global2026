@@ -3,7 +3,7 @@ use bevy::{color::palettes::css::*, prelude::*};
 
 use crate::collision::Hitbox;
 use crate::level::LevelEntity;
-use crate::player::Player;
+use crate::player::{Player, HasMask};
 
 const ENEMY_VELOCITY: f32 = 320.0;
 const EPSILON: f32 = 5.0;
@@ -254,8 +254,16 @@ fn collide_player(
 fn detect_player(
     mut commands: Commands,
     player_transform: Single<&Transform, With<Player>>,
+    player_has_mask: Single<&HasMask, With<Player>>,
     mut enemy_query: Query<(Entity, &Transform, &Detection), (Without<Target>, With<Enemy>)>,
+    mut chasing_query: Query<Entity, (With<Enemy>, With<Target>)>,
 ) {
+    if player_has_mask.0 {
+        for e in &chasing_query {
+             commands.entity(e).remove::<Target>();
+        }
+        return;
+    }
     for (entity, en_trans, detection) in &mut enemy_query {
         let en_min_x = en_trans.translation.x - detection.size.x / 2.0;
         let en_max_x = en_trans.translation.x + detection.size.x / 2.0;
