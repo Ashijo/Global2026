@@ -214,9 +214,11 @@ fn enemy_movement(
 }
 
 fn collide_player(
-    enemy_query: Query<(&Transform, &Hitbox), With<Enemy>>,
+    mut commands: Commands,
+    enemy_query: Query<(Entity, &Transform, &Hitbox, Option<&Stunned>), With<Enemy>>,
     player_transform: Single<&Transform, With<Player>>,
     player_hitbox: Single<&Hitbox, With<Player>>,
+    player_mask: Single<&HasMask, With<Player>>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
     let mut kill = false;
@@ -230,7 +232,7 @@ fn collide_player(
     let p_max_y =
         player_transform.translation.y + player_hitbox.size.y / 2.0 + player_hitbox.offset.y;
 
-    for (en_trans, hitbox) in &enemy_query {
+    for (enemy_entity, en_trans, hitbox, stunned) in &enemy_query {
         let en_min_x = en_trans.translation.x - hitbox.size.x / 2.0;
         let en_max_x = en_trans.translation.x + hitbox.size.x / 2.0;
         let en_min_y = en_trans.translation.y - hitbox.size.y / 2.0;
@@ -239,8 +241,19 @@ fn collide_player(
         let x_overlap = p_min_x < en_max_x && p_max_x > en_min_x;
         let y_overlap = p_min_y < en_max_y && p_max_y > en_min_y;
 
-        kill = x_overlap && y_overlap;
-    }
+        if x_overlap && y_overlap {
+            if stunned.is_some() || player_mask.0 {
+                // Enemy is stunned OR player has mask → despawn enemy
+                commands.entity(enemy_entity).despawn();
+                if player_mask.0 {
+                    println!("💀 Enemy killed by masked player!");
+                } else {
+                    println!("💀 Enemy killed while stunned!");
+                }
+            } else {
+                kill = true;
+            }
+        }    }
 
     if kill {
         if cfg!(debug_assertions) {
