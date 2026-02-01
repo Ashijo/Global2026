@@ -61,7 +61,8 @@ pub fn enemy_setup(
         animation_indices_1,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
         Hitbox {
-            size: Vec2::splat(64.0)
+            size: Vec2::splat(64.0),
+            offset: Vec2::ZERO,
         },
     ));
 
@@ -81,7 +82,8 @@ pub fn enemy_setup(
         animation_indices_2,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
         Hitbox {
-            size: Vec2::splat(64.0)
+            size: Vec2::splat(64.0),
+            offset: Vec2::ZERO,
         },
     ));
 
@@ -101,7 +103,8 @@ pub fn enemy_setup(
         animation_indices_3,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
         Hitbox {
-            size: Vec2::splat(64.0)
+            size: Vec2::splat(64.0),
+            offset: Vec2::ZERO,
         },
     ));
 }
@@ -183,10 +186,10 @@ fn gizmo_hitbox(
     mut hitbox_query: Query<(&Hitbox, &Transform)>
 ) {
     for (hitbox, transform) in &hitbox_query {
-        let min_x = transform.translation.x - hitbox.size.x / 2.0;
-        let max_x = transform.translation.x + hitbox.size.x / 2.0;
-        let min_y = transform.translation.y - hitbox.size.y / 2.0;
-        let max_y = transform.translation.y + hitbox.size.y / 2.0;
+        let min_x = transform.translation.x - hitbox.size.x / 2.0 + hitbox.offset.x;
+        let max_x = transform.translation.x + hitbox.size.x / 2.0 + hitbox.offset.x;
+        let min_y = transform.translation.y - hitbox.size.y / 2.0 + hitbox.offset.y;
+        let max_y = transform.translation.y + hitbox.size.y / 2.0 + hitbox.offset.y;
 
         gizmos.line_2d(Vec2::new(min_x, min_y), Vec2::new(min_x, max_y), RED);
         gizmos.line_2d(Vec2::new(min_x, min_y), Vec2::new(max_x, min_y), RED);
@@ -202,10 +205,10 @@ fn collide_player(
 ) {
     let mut kill = false;
 
-    let p_min_x = player_transform.translation.x - player_hitbox.size.x / 2.0;
-    let p_max_x = player_transform.translation.x + player_hitbox.size.x / 2.0;
-    let p_min_y = player_transform.translation.y - player_hitbox.size.y / 2.0;
-    let p_max_y = player_transform.translation.y + player_hitbox.size.y / 2.0;
+    let p_min_x = player_transform.translation.x - player_hitbox.size.x / 2.0 + player_hitbox.offset.x;
+    let p_max_x = player_transform.translation.x + player_hitbox.size.x / 2.0  + player_hitbox.offset.x;
+    let p_min_y = player_transform.translation.y - player_hitbox.size.y / 2.0 + player_hitbox.offset.y;
+    let p_max_y = player_transform.translation.y + player_hitbox.size.y / 2.0 + player_hitbox.offset.y;
 
     for (en_trans, hitbox) in &enemy_query {
         let en_min_x = en_trans.translation.x - hitbox.size.x / 2.0;

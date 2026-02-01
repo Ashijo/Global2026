@@ -32,7 +32,7 @@ pub fn spawn_blast(commands: &mut Commands, asset_server: &Res<AssetServer>, cen
             ..default()
         },
         Transform::from_xyz(center.x, center.y, BLAST_Z),
-        Hitbox { size: Vec2::splat(BLAST_SIZE) },
+        Hitbox { size: Vec2::splat(BLAST_SIZE), offset: Vec2::ZERO },
     ));
 
     // spawn blast arms
@@ -51,7 +51,7 @@ pub fn spawn_blast(commands: &mut Commands, asset_server: &Res<AssetServer>, cen
                 ..default()
             },
             Transform::from_xyz(center.x, center.y + offset, BLAST_Z),
-            Hitbox { size: Vec2::splat(BLAST_SIZE) },
+            Hitbox { size: Vec2::splat(BLAST_SIZE), offset: Vec2::ZERO },
         ));
 
         // Down
@@ -66,7 +66,7 @@ pub fn spawn_blast(commands: &mut Commands, asset_server: &Res<AssetServer>, cen
                 ..default()
             },
             Transform::from_xyz(center.x, center.y - offset, BLAST_Z),
-            Hitbox { size: Vec2::splat(BLAST_SIZE) },
+            Hitbox { size: Vec2::splat(BLAST_SIZE), offset: Vec2::ZERO },
         ));
 
         // Right
@@ -81,7 +81,7 @@ pub fn spawn_blast(commands: &mut Commands, asset_server: &Res<AssetServer>, cen
                 ..default()
             },
             Transform::from_xyz(center.x + offset, center.y, BLAST_Z),
-            Hitbox { size: Vec2::splat(BLAST_SIZE) },
+            Hitbox { size: Vec2::splat(BLAST_SIZE), offset: Vec2::ZERO },
         ));
 
         // Left
@@ -96,7 +96,7 @@ pub fn spawn_blast(commands: &mut Commands, asset_server: &Res<AssetServer>, cen
                 ..default()
             },
             Transform::from_xyz(center.x - offset, center.y, BLAST_Z),
-            Hitbox { size: Vec2::splat(BLAST_SIZE) },
+            Hitbox { size: Vec2::splat(BLAST_SIZE), offset: Vec2::ZERO },
         ));
     }
 }
@@ -123,7 +123,7 @@ pub fn blast_collision_system(
                 continue;
             }
 
-            let target_pos = target_tf.translation.truncate();
+            let target_pos = target_tf.translation.truncate() + target_hitbox.offset;
             let target_half = target_hitbox.size * 0.5;
 
             let delta = blast_pos - target_pos;
