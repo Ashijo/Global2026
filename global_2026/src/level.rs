@@ -8,5 +8,6 @@ pub fn despawn_entities<'a>(
 ) {
     for e in entities {
         commands.entity(e).despawn();
+        println!("entity");
     }
 }
