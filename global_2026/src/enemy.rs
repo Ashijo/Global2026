@@ -202,8 +202,8 @@ fn enemy_movement(
             }
         } else {
             commands.entity(entity).remove::<Target>();
-
-            let mut rng = rand::thread_rng();
+            
+            let mut rng = rand::rng();
             let fuse_time = TARGET_FUSE_TIME.choose(&mut rng).unwrap();
 
             commands.entity(entity).insert(FuseTime{
@@ -257,8 +257,8 @@ fn detect_player(
     mut commands: Commands,
     player_transform: Single<&Transform, With<Player>>,
     player_has_mask: Single<&HasMask, With<Player>>,
-    mut enemy_query: Query<(Entity, &Transform, &Detection, Option<&Target>), (With<Enemy>)>,
-    mut chasing_query: Query<Entity, (With<Enemy>, With<Target>)>,
+    mut enemy_query: Query<(Entity, &Transform, &Detection, Option<&Target>), With<Enemy>>,
+    chasing_query: Query<Entity, (With<Enemy>, With<Target>)>,
 ) {
     if player_has_mask.0 {
         let mut rng = rand::thread_rng();

@@ -1,4 +1,4 @@
-use bevy::prelude::{Commands, Component, Entity, Query, With};
+use bevy::prelude::{Commands, Component, Entity};
 #[derive(Component)]
 pub struct LevelEntity;
 
