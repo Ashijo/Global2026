@@ -23,6 +23,7 @@ const WINDOW_HEIGHT:f32 = 1080.0;
 enum GameState {
     #[default]
     Playing,
+    Restart,
     GameOver,
 }
 
