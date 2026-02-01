@@ -30,7 +30,7 @@ pub fn hud_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // control help
     commands.spawn((
-        Text::new("⇦A  ⇧W  ⇩S  ⇨D\nDrop a bomb ␣ "),
+        Text::new("⇦A  ⇧W  ⇩S  ⇨D\n␣ Drop a bomb"),
         TextFont {
             font,
             font_size: 18.0,
@@ -48,13 +48,28 @@ pub fn hud_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         Text::new("Drop Truth Bombs and Unmask Oppressors!"),
         TextFont {
-            font_size: 15.0,
+            font_size: 18.0,
             ..default()
         },
         TextColor(Color::WHITE.into()),
         Node {
             position_type: PositionType::Absolute,
             top: Val::Px(10.0),
+            left: Val::Px(10.0),
+            ..default()
+        },
+    ));
+
+    commands.spawn((
+        Text::new(""),
+        TextFont {
+            font_size: 18.0,
+            ..default()
+        },
+        TextColor(Color::WHITE.into()),
+        Node {
+            position_type: PositionType::Absolute,
+            top: Val::Px(30.0),
             left: Val::Px(10.0),
             ..default()
         },
