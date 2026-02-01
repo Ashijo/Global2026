@@ -3,6 +3,7 @@ use bevy::{color::palettes::css::*, prelude::*};
 
 use crate::collision::Hitbox;
 use crate::level::LevelEntity;
+use crate::stunned::Stunned;
 use crate::player::{Player, HasMask};
 
 const ENEMY_VELOCITY: f32 = 320.0;
@@ -154,9 +155,12 @@ pub fn enemy_animation(
 fn enemy_movement(
     time: Res<Time>,
     mut commands: Commands,
-    mut enemy_query: Query<(Entity, &mut Transform, &Target), (With<Target>, With<Enemy>)>,
+    mut enemy_query: Query<(Entity, &mut Transform, &Target,Option<&Stunned>), (With<Target>, With<Enemy>)>,
 ) {
-    for (entity, mut transform, target) in &mut enemy_query {
+    for (entity, mut transform, target, stunned) in &mut enemy_query {
+        if stunned.is_some() {
+            continue;
+        }
         if !close_to_target(target, *transform, EPSILON) {
             let mut dir = Vec2::ZERO;
 
