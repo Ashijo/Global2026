@@ -44,8 +44,8 @@ pub fn bomb_update(
             None => return,
         };
 
-        let normal_texture = asset_server.load("img/bomb.png");
-        let white_texture = asset_server.load("img/bomb_white.png");
+        let normal_texture = asset_server.load("img/bomb_2.png");
+        let white_texture = asset_server.load("img/bomb_white_2.png");
 
         commands.spawn((
             Bomb,

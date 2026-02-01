@@ -5,8 +5,8 @@ use crate::bomb::{BOMB_SIZE, BOMB_Z};
 use crate::collision::Hitbox;
 use crate::stunned::{Stunned, STUN_DURATION};
 pub const BLAST_SIZE: f32 = BOMB_SIZE;
-pub const BLAST_LENGTH: u32 = 3;
-pub const BLAST_DURATION: f32 = 1.0;
+pub const BLAST_LENGTH: u32 = 5;
+pub const BLAST_DURATION: f32 = 0.3;
 pub const BLAST_Z: f32 = BOMB_Z + 0.01;
 
 #[derive(Component)]
@@ -19,7 +19,7 @@ pub struct BlastTimer {
 
 // spawn blast centered around bomb
 pub fn spawn_blast(commands: &mut Commands, asset_server: &Res<AssetServer>, center: Vec3) {
-    let blast_texture = asset_server.load("img/bomb.png");
+    let blast_texture = asset_server.load("img/blast.png");
 
     //spawn center blast
     commands.spawn((
