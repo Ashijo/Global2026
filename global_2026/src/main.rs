@@ -7,6 +7,7 @@ mod mask;
 mod blast;
 mod collision;
 mod level;
+mod stunned;
 
 use bevy::prelude::*;
 use bevy::camera::ScalingMode;
@@ -35,7 +36,13 @@ fn main() {
         .add_systems(OnEnter(GameState::Restart), restart_game)
         .add_systems(Startup, (main_setup, map::map_setup,bomb::bomb_setup, player::player_setup, hud::hud_setup, mask::mask_setup))
         .add_systems(Update, (map::map_update,bomb::bomb_update, player::player_update, blast::blast_update, hud::hud_update))
-        .add_systems(FixedUpdate, (map::map_fixed_update,bomb::bomb_fixed_update, player::player_fixed_update, player::player_animation, mask::spawn_masks, blast::blast_collision_system,).chain())
+        .add_systems(FixedUpdate, (map::map_fixed_update,
+                                   bomb::bomb_fixed_update,
+                                   player::player_fixed_update, player::player_animation, player::pickup_mask, player::mask_timer_update,
+                                   mask::spawn_masks,
+                                   blast::blast_collision_system, 
+                                   stunned::stun_update,
+        ).chain())
         .run();
 }
 

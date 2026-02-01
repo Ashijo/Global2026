@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 use crate::collision::Hitbox;
+use crate::mask::Mask;
+use crate::stunned::Stunned;
 use crate::level::LevelEntity;
 
 const SPEED: f32 = 300.0;
@@ -24,6 +26,14 @@ pub struct Anim {
     last: usize,
     timer: Timer,
     playing: bool,
+}
+
+#[derive(Component, Debug)]
+pub struct HasMask(pub bool);
+
+#[derive(Component)]
+pub struct MaskTimer {
+    pub timer: Timer,
 }
 
 #[derive(Component, Clone, Copy)]
@@ -54,6 +64,7 @@ pub fn player_setup(
 
     commands.spawn((
         Player,
+        HasMask(false),
         Facing::Down,
         Anim {
             first: 0,
@@ -79,11 +90,16 @@ pub fn player_setup(
 pub fn player_fixed_update(
     keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
-    mut q: Query<(&mut Transform, &mut Facing, &mut Anim, &mut Sprite), With<Player>>,
+    mut q: Query<(&mut Transform, &mut Facing, &mut Anim, &mut Sprite, Option<&Stunned>), With<Player>>,
 ) {
-    let Ok((mut tf, mut facing, mut anim, mut sprite)) = q.single_mut() else {
+    let Ok((mut tf, mut facing, mut anim, mut sprite, stunned)) = q.single_mut() else {
         return;
     };
+
+    if stunned.is_some() {
+        anim.playing = false;
+        return;
+    }
 
     let mut dir = Vec2::ZERO;
     if keys.pressed(KeyCode::KeyA) { dir.x -= 1.0; }
@@ -166,4 +182,58 @@ pub fn player_animation(
 
 pub fn player_update() {
 
+}
+
+pub fn pickup_mask(
+    mut commands: Commands,
+    mut player_q: Query<(Entity, &Transform, &Hitbox, &mut HasMask), With<Player>>,
+    mask_q: Query<(Entity, &Transform, &Hitbox), With<Mask>>,
+) {
+    let Ok((player_entity, p_tf, p_hb, mut has_mask)) = player_q.single_mut() else { return; };
+    if has_mask.0 {
+        return;
+    }
+
+    let p_center = p_tf.translation.truncate() + p_hb.offset;
+    let p_half = p_hb.size * 0.5;
+
+    for (mask_e, m_tf, m_hb) in &mask_q {
+        let m_center = m_tf.translation.truncate() + m_hb.offset;
+        let m_half = m_hb.size * 0.5;
+
+        let delta = (p_center - m_center).abs();
+
+        let overlap =
+            delta.x < (p_half.x + m_half.x) &&
+                delta.y < (p_half.y + m_half.y);
+
+        if overlap {
+            has_mask.0 = true;
+            commands.entity(mask_e).despawn();
+            commands.entity(player_entity).insert(
+                MaskTimer {
+                    timer: Timer::from_seconds(8.0, TimerMode::Once),
+                }
+            );
+            println!("You picked up a mask");
+            break;
+        }
+    }
+}
+
+pub fn mask_timer_update(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut q: Query<(Entity, &mut HasMask, &mut MaskTimer), With<Player>>,
+) {
+    let Some((entity, mut has_mask, mut mask_timer)) = q.iter_mut().next() else {
+        return; // aucun joueur (ou pas de MaskTimer) => rien à faire
+    };
+
+    mask_timer.timer.tick(time.delta());
+    if mask_timer.timer.just_finished() {
+        has_mask.0 = false;
+        println!("Time's up! Your mask is kaput...");
+        commands.entity(entity).remove::<MaskTimer>();
+    }
 }

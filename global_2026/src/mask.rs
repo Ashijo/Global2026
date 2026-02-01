@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use rand::RngExt;
 use crate::{WINDOW_HEIGHT, WINDOW_WIDTH};
+use crate::collision::Hitbox;
 use crate::level::LevelEntity;
 
 //rng = random number generation
@@ -46,5 +47,9 @@ pub fn spawn_masks(mut commands: Commands,
             ..default()
         },
         Transform::from_xyz(x, y, 0.0),
+        Hitbox{
+            size: Vec2::new(32.0, 64.0),
+            offset: Vec2::ZERO,
+        }
     )).insert(LevelEntity);
 }
