@@ -38,7 +38,7 @@ pub fn enemy_setup(
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
-    let texture = asset_server.load("img/enemy.png");
+    let texture = asset_server.load("img/cop_2.png");
 
     // from_grid define spritesheet division ( tile_size: UVec2,
     //     columns: u32,
@@ -46,22 +46,26 @@ pub fn enemy_setup(
     //     padding: Option<UVec2>,
     //     offset: Option<UVec2>)
     let layout = TextureAtlasLayout::from_grid(
-        UVec2::splat(16),
-        13,
+        UVec2 {  
+            x: 49,
+            y: 65
+        },
+        9,
         1,
-        Some(UVec2::splat(1)),
-        Some(UVec2::splat(1)),
+        None,
+        None
     );
+
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
     // Use only the subset of sprites in the sheet that make up the run animation
-    let animation_indices_1 = AnimationIndices { first: 0, last: 2 };
-    let animation_indices_2 = AnimationIndices { first: 3, last: 5 };
-    let animation_indices_3 = AnimationIndices { first: 6, last: 8 };
+    let animation_indices_1 = AnimationIndices { first: 0, last: 8 };
+    let animation_indices_2 = AnimationIndices { first: 0, last: 8 };
+    let animation_indices_3 = AnimationIndices { first: 0, last: 8 };
 
-    let mut transform_1 = Transform::from_scale(Vec3::splat(4.0));
-    let mut transform_2 = Transform::from_scale(Vec3::splat(4.0));
-    let mut transform_3 = Transform::from_scale(Vec3::splat(4.0));
+    let mut transform_1 = Transform::from_scale(Vec3::splat(1.0));
+    let mut transform_2 = Transform::from_scale(Vec3::splat(1.0));
+    let mut transform_3 = Transform::from_scale(Vec3::splat(1.0));
 
     transform_1.translation = Vec3::new(1750.0, 100.0, 1.0);
     transform_2.translation = Vec3::new(1750.0, 500.0, 1.0);
@@ -79,7 +83,7 @@ pub fn enemy_setup(
             ),
             transform_1,
             animation_indices_1,
-            AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+            AnimationTimer(Timer::from_seconds(0.2, TimerMode::Repeating)),
             Hitbox {
                 size: Vec2::splat(64.0),
                 offset: Vec2::ZERO,
@@ -105,7 +109,7 @@ pub fn enemy_setup(
             ),
             transform_2,
             animation_indices_2,
-            AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+            AnimationTimer(Timer::from_seconds(0.2, TimerMode::Repeating)),
             Hitbox {
                 size: Vec2::splat(64.0),
                 offset: Vec2::ZERO,
@@ -131,7 +135,7 @@ pub fn enemy_setup(
             ),
             transform_3,
             animation_indices_3,
-            AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+            AnimationTimer(Timer::from_seconds(0.2, TimerMode::Repeating)),
             Hitbox {
                 size: Vec2::splat(64.0),
                 offset: Vec2::ZERO,
@@ -203,8 +207,8 @@ fn enemy_movement(
             }
         } else {
             commands.entity(entity).remove::<Target>();
-
-            let mut rng = rand::thread_rng();
+            
+            let mut rng = rand::rng();
             let fuse_time = TARGET_FUSE_TIME.choose(&mut rng).unwrap();
 
             commands.entity(entity).insert(FuseTime{
@@ -268,11 +272,11 @@ fn detect_player(
     mut commands: Commands,
     player_transform: Single<&Transform, With<Player>>,
     player_has_mask: Single<&HasMask, With<Player>>,
-    mut enemy_query: Query<(Entity, &Transform, &Detection, Option<&Target>), (With<Enemy>)>,
-    mut chasing_query: Query<Entity, (With<Enemy>, With<Target>)>,
+    mut enemy_query: Query<(Entity, &Transform, &Detection, Option<&Target>), With<Enemy>>,
+    chasing_query: Query<Entity, (With<Enemy>, With<Target>)>,
 ) {
     if player_has_mask.0 {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
 
         for e in &chasing_query {
             commands.entity(e).remove::<Target>();
@@ -319,11 +323,11 @@ fn random_target_spawner(
         fuse_timer.timer.tick(time.delta());
 
         if fuse_timer.timer.just_finished() {
-            let mut rng = rand::thread_rng();
+            let mut rng = rand::rng();
             let target = Target{
                 pos: Vec2{
-                    x: rng.gen_range(100.0..1800.0),
-                    y: rng.gen_range(100.0..800.0)
+                    x: rng.random_range(100.0..1800.0),
+                    y: rng.random_range(100.0..800.0)
                 }
             };
 
