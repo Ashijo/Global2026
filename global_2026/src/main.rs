@@ -13,6 +13,7 @@ use bevy::prelude::*;
 use bevy::camera::ScalingMode;
 use bevy::prelude::OrthographicProjection;
 use crate::enemy::EnemyPlugin;
+use crate::player::PlayerPlugin;
 
 use crate::level::LevelEntity;
 use crate::level::despawn_entities;
@@ -32,13 +33,13 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(EnemyPlugin)
+        .add_plugins(PlayerPlugin)
         .init_state::<GameState>()
         .add_systems(OnEnter(GameState::Restart), (restart_game, player::player_setup, enemy::enemy_setup))
-        .add_systems(Startup, (main_setup, map::map_setup,bomb::bomb_setup, player::player_setup, hud::hud_setup, mask::mask_setup))
-        .add_systems(Update, (map::map_update,bomb::bomb_update, player::player_update, blast::blast_update, hud::hud_update))
+        .add_systems(Startup, (main_setup, map::map_setup,bomb::bomb_setup, hud::hud_setup, mask::mask_setup))
+        .add_systems(Update, (map::map_update,bomb::bomb_update, blast::blast_update, hud::hud_update))
         .add_systems(FixedUpdate, (map::map_fixed_update,
                                    bomb::bomb_fixed_update,
-                                   player::player_fixed_update, player::player_animation, player::pickup_mask, player::mask_timer_update,
                                    mask::spawn_masks,
                                    blast::blast_collision_system, 
                                    stunned::stun_update,

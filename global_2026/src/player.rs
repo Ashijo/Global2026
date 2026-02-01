@@ -43,6 +43,24 @@ pub enum Facing {
     Up,
 }
 
+pub struct PlayerPlugin;
+
+impl Plugin for PlayerPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, player_setup);
+        app.add_systems(
+            FixedUpdate,
+            (
+                player_fixed_update,
+                player_animation,
+                pickup_mask,
+                mask_timer_update,
+            )
+                .chain(),
+        );
+    }
+}
+
 pub fn player_setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -178,10 +196,6 @@ pub fn player_animation(
     if anim.timer.just_finished() {
         atlas.index = if atlas.index >= anim.last { anim.first } else { atlas.index + 1 };
     }
-}
-
-pub fn player_update() {
-
 }
 
 pub fn pickup_mask(
