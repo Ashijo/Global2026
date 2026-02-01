@@ -275,7 +275,7 @@ fn detect_player(
     chasing_query: Query<Entity, (With<Enemy>, With<Target>)>,
 ) {
     if player_has_mask.0 {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
 
         for e in &chasing_query {
             commands.entity(e).remove::<Target>();
@@ -322,11 +322,11 @@ fn random_target_spawner(
         fuse_timer.timer.tick(time.delta());
 
         if fuse_timer.timer.just_finished() {
-            let mut rng = rand::thread_rng();
+            let mut rng = rand::rng();
             let target = Target{
                 pos: Vec2{
-                    x: rng.gen_range(100.0..1800.0),
-                    y: rng.gen_range(100.0..800.0)
+                    x: rng.random_range(100.0..1800.0),
+                    y: rng.random_range(100.0..800.0)
                 }
             };
 
