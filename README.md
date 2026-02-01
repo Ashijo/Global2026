@@ -1,56 +1,50 @@
-# 🎮 [Game Title]
-**Global Game Jam 20XX Entry**
+# 🎮 Truth Bomber
+**Global Game Jam 2026 Entry**
 
-> One-line pitch for your game.
+> In a regime built on fear and secrecy, you play an activist armed with truth. Drop truth bombs on masked enforcers, break through their propaganda shields, and unmask what they really stand for.
 
 ---
 
 ## 🕹️ About the Game
-**[Game Title]** was created in **48 hours** for **Global Game Jam 20XX**, based on the theme:
+**Truth Bomber** was created in **48 hours** for **Global Game Jam 2026**, based on the theme:
 
-> **Theme:** *[GGJ Theme]*
+> **Theme:** MASKS
 
 Briefly describe:
-- The core gameplay
-- The main objective
-- What makes it unique
-
----
-
-## 🎯 Features
-- Feature / mechanic #1  
-- Feature / mechanic #2  
-- Theme-related twist  
-- Single-player / Multiplayer
+- Drop truth bombs on enemies and see them run away when unmasked.
+- Pickup masks on the floor and wear them to approach the oppressors.
 
 ---
 
 ## 🛠️ Built With
-- **Engine:**  
-- **Language:**  
-- **Tools:**  
-- **Audio / Art:**  
+- **Engine: Bevy 0.18**  
+- **Language: Rust**
+<!--   
+ - **Tools:**  
+ - **Audio / Art:**  
+-->
 
 ---
 
 ## 👥 Team
 | Name | Role |
 |------|------|
-|      |      |
-|      |      |
-|      |      |
+| Gaetan Pasquet | Programmer |
+| Thierry Dorion | Programmer |
+| Luigi Besani Urena | Programmer |
+| David Baron | Programmer |
 
 ---
 
 ## 🎮 Controls
 | Action | Input |
 |------|------|
-| Move | |
-| Action | |
-| Pause | |
+| Move | WASD|
+| Bomb | Space |
 
 ---
 
+<!-- 
 ## ▶️ How to Play
 
 ### Download
@@ -63,3 +57,4 @@ Briefly describe:
 git clone https://github.com/yourname/your-repo.git
 cd your-repo
 # build / run instructions
+-->
