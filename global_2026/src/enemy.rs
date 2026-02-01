@@ -267,7 +267,7 @@ fn collide_player(
             println!("DEAD !!!");
         }
         else {
-            next_state.set(GameState::GameOver);
+            next_state.set(GameState::Restart);
             //println!("{:?}", next_state);
         }
     }

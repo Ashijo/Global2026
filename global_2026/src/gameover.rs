@@ -1,18 +1,12 @@
-
 use bevy::prelude::*;
 use crate::GameState;
-use crate::unmasked::UnmaskedScore;
 
-#[derive(Component)]
-pub struct ExitButton;
-
-#[derive(Component)]
-pub struct RestartButton;
-#[derive(Component)]
-pub struct ScoreText;
-
-pub fn gameover_setup(mut commands: Commands) {
+pub fn gameover_setup(mut commands: Commands,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    /*
     commands.spawn((
+        GameOverComp,
         Text::new("Game Over"),
         TextFont {
             font_size: 40.0,
@@ -26,4 +20,23 @@ pub fn gameover_setup(mut commands: Commands) {
             ..default()
         },
     ));
+*/
+
+    next_state.set(GameState::Restart);
+
 }
+
+
+pub fn reset_gameover(
+    mut commands: Commands,
+    mut player_entity: Single<Entity, With<GameOverComp>>) {
+   
+    let (e) = player_entity;
+    println!("should despawn");
+    commands.entity(*e).despawn();
+
+}
+
+#[derive(Component)]
+pub struct GameOverComp;
+

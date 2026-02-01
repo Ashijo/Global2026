@@ -44,7 +44,7 @@ fn main() {
         .init_state::<GameState>()
         .insert_resource(UnmaskedScore::default())
         .add_systems(OnEnter(GameState::GameOver), gameover::gameover_setup)
-        .add_systems(OnEnter(GameState::Restart), (restart_game, player::player_setup, enemy::enemy_setup))
+        .add_systems(OnEnter(GameState::Restart), (restart_game, player::player_setup, enemy::enemy_setup, gameover::reset_gameover))
         .add_systems(Startup, (main_setup, map::map_setup,bomb::bomb_setup, hud::hud_setup, mask::mask_setup))
         .add_systems(Update, (bomb::bomb_update, blast::blast_update, hud::hud_update, hud::hud_score_update))
         .add_systems(FixedUpdate, (bomb::bomb_fixed_update,
