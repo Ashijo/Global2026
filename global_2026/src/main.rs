@@ -7,6 +7,7 @@ mod mask;
 mod blast;
 mod collision;
 mod level;
+mod stunned;
 
 use bevy::prelude::*;
 use bevy::camera::ScalingMode;
@@ -39,7 +40,8 @@ fn main() {
                                    bomb::bomb_fixed_update,
                                    player::player_fixed_update, player::player_animation, player::pickup_mask, player::mask_timer_update,
                                    mask::spawn_masks,
-                                   blast::blast_collision_system,
+                                   blast::blast_collision_system, 
+                                   stunned::stun_update,
         ).chain())
         .run();
 }
