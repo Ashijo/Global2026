@@ -3,7 +3,6 @@ use bevy::prelude::Gizmo;
 use rand::prelude::*;
 
 use crate::collision::Hitbox;
-use crate::level::LevelEntity;
 use crate::player::Player;
 
 const ENEMY_VELOCITY: f32 = 400.0;
@@ -14,7 +13,7 @@ pub struct EnemyPlugin;
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, enemy_setup);
-        app.add_systems(FixedUpdate, (enemy_fixed_update, collide_player, gizmo_hitbox));
+        app.add_systems(FixedUpdate, (enemy_fixed_update, collide_player, gizmo_hitbox).chain());
     }
 }
 
@@ -64,7 +63,7 @@ pub fn enemy_setup(
         Hitbox {
             size: Vec2::splat(64.0)
         },
-    )).insert(LevelEntity);
+    ));
 
     commands.spawn((
         Enemy {
@@ -84,7 +83,7 @@ pub fn enemy_setup(
         Hitbox {
             size: Vec2::splat(64.0)
         },
-    )).insert(LevelEntity);
+    ));
 
     commands.spawn((
         Enemy {
@@ -104,7 +103,7 @@ pub fn enemy_setup(
         Hitbox {
             size: Vec2::splat(64.0)
         },
-    )).insert(LevelEntity);
+    ));
 }
 
 pub fn enemy_update() {}
@@ -133,8 +132,6 @@ pub fn enemy_fixed_update(
         match &enemy.target {
             Some(value) => {
                 if !close_to_target(value, *transform, EPSILON) {
-
-
                     let mut dir = Vec2::ZERO;
 
                     if !eps_x(value, *transform, EPSILON) {
