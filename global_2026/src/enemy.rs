@@ -1,12 +1,11 @@
 use bevy::{color::palettes::css::*, prelude::*} ;
-use bevy::prelude::Gizmo;
 use rand::prelude::*;
 
 use crate::collision::Hitbox;
 use crate::level::LevelEntity;
 use crate::player::Player;
 
-const ENEMY_VELOCITY: f32 = 400.0;
+const ENEMY_VELOCITY: f32 = 320.0;
 const EPSILON: f32 = 5.0;
 
 pub struct EnemyPlugin;
@@ -14,7 +13,7 @@ pub struct EnemyPlugin;
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, enemy_setup);
-        app.add_systems(FixedUpdate, (enemy_fixed_update, collide_player, gizmo_hitbox, gizmo_detection).chain());
+        app.add_systems(FixedUpdate, (enemy_fixed_update, collide_player, detect_player, gizmo_hitbox, gizmo_detection).chain());
     }
 }
 
@@ -43,13 +42,18 @@ pub fn enemy_setup(
     let animation_indices_1 = AnimationIndices { first: 0, last: 2 };
     let animation_indices_2 = AnimationIndices { first: 3, last: 5 };
     let animation_indices_3 = AnimationIndices { first: 6, last: 8 };
-    let mut transform = Transform::from_scale(Vec3::splat(4.0));
-    transform.translation = Vec3::new(150.0, 70.0, 1.0);
+
+    let mut transform_1 = Transform::from_scale(Vec3::splat(4.0));
+    let mut transform_2 = Transform::from_scale(Vec3::splat(4.0));
+    let mut transform_3 = Transform::from_scale(Vec3::splat(4.0));
+
+    transform_1.translation = Vec3::new(1750.0, 100.0, 1.0);
+    transform_2.translation = Vec3::new(1750.0, 500.0, 1.0);
+    transform_3.translation = Vec3::new(1750.0, 800.0, 1.0);
 
     commands.spawn((
         Enemy {
-            target: None,
-            id: 1,
+            target: None
         },
         Sprite::from_atlas_image(
             texture.clone(),
@@ -58,7 +62,7 @@ pub fn enemy_setup(
                 index: animation_indices_1.first,
             },
         ),
-        transform,
+        transform_1,
         animation_indices_1,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
         Hitbox {
@@ -71,8 +75,7 @@ pub fn enemy_setup(
 
     commands.spawn((
         Enemy {
-            target: None,
-            id: 2,
+            target: None
         },
         Sprite::from_atlas_image(
             texture.clone(),
@@ -81,7 +84,7 @@ pub fn enemy_setup(
                 index: animation_indices_2.first,
             },
         ),
-        transform,
+        transform_2,
         animation_indices_2,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
         Hitbox {
@@ -94,8 +97,7 @@ pub fn enemy_setup(
 
     commands.spawn((
         Enemy {
-            target: None,
-            id: 3,
+            target: None
         },
         Sprite::from_atlas_image(
             texture.clone(),
@@ -104,7 +106,7 @@ pub fn enemy_setup(
                 index: animation_indices_3.first,
             },
         ),
-        transform,
+        transform_3,
         animation_indices_3,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
         Hitbox {
@@ -116,8 +118,6 @@ pub fn enemy_setup(
         },
     )).insert(LevelEntity);
 }
-
-pub fn enemy_update() {}
 
 pub fn enemy_fixed_update(
     time: Res<Time>,
@@ -142,6 +142,8 @@ pub fn enemy_fixed_update(
     for (mut enemy, mut transform) in &mut enemy_query {
         match &enemy.target {
             Some(value) => {
+
+
                 if !close_to_target(value, *transform, EPSILON) {
                     let mut dir = Vec2::ZERO;
 
@@ -191,7 +193,7 @@ pub fn enemy_fixed_update(
 
 fn gizmo_hitbox(
     mut gizmos: Gizmos,
-    mut hitbox_query: Query<(&Hitbox, &Transform)>
+    hitbox_query: Query<(&Hitbox, &Transform)>
 ) {
     for (hitbox, transform) in &hitbox_query {
         let min_x = transform.translation.x - hitbox.size.x / 2.0 + hitbox.offset.x;
@@ -209,7 +211,7 @@ fn gizmo_hitbox(
 
 fn gizmo_detection(
     mut gizmos: Gizmos,
-    mut detection_query: Query<(&Detection, &Transform)>
+    detection_query: Query<(&Detection, &Transform)>
 ) {
     for (detection, transform) in &detection_query {
         let min_x = transform.translation.x - detection.size.x / 2.0;
@@ -225,9 +227,9 @@ fn gizmo_detection(
 }
 
 fn collide_player(
-    mut enemy_query: Query<(&Transform, &Hitbox), With<Enemy>>,
-    mut player_transform: Single<&Transform, With<Player>>,
-    mut player_hitbox: Single<&Hitbox, With<Player>>,
+    enemy_query: Query<(&Transform, &Hitbox), With<Enemy>>,
+    player_transform: Single<&Transform, With<Player>>,
+    player_hitbox: Single<&Hitbox, With<Player>>,
 ) {
     let mut kill = false;
 
@@ -253,6 +255,27 @@ fn collide_player(
     }
 }
 
+fn detect_player(
+    player_transform: Single<&Transform, With<Player>>,
+    mut enemy_query: Query<(&Transform, &Detection, &mut Enemy)>
+) {
+    for (en_trans, detection, mut enemy) in &mut enemy_query {
+        let en_min_x = en_trans.translation.x - detection.size.x / 2.0;
+        let en_max_x = en_trans.translation.x + detection.size.x / 2.0;
+        let en_min_y = en_trans.translation.y - detection.size.y / 2.0;
+        let en_max_y = en_trans.translation.y + detection.size.y / 2.0;
+
+        let x_overlap = player_transform.translation.x < en_max_x && player_transform.translation.x > en_min_x;
+        let y_overlap = player_transform.translation.y < en_max_y && player_transform.translation.y > en_min_y;
+
+        let detect = x_overlap && y_overlap;
+
+        if detect {
+            enemy.target = Some(Target{x: player_transform.translation.x, y:player_transform.translation.y});
+        }
+    }
+}
+
 fn close_to_target(target: &Target, trans: Transform, eps: f32) -> bool {
     eps_x(target, trans, eps) && eps_y(target, trans, eps)
 }
@@ -267,8 +290,7 @@ fn eps_y(target: &Target, trans: Transform, eps: f32) -> bool {
 
 #[derive(Component)]
 pub struct Enemy {
-    target: Option<Target>,
-    id: u32,
+    target: Option<Target>
 }
 
 #[derive(Component)]
