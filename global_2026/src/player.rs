@@ -97,7 +97,7 @@ pub fn player_setup(
                 index: start_index,
             },
         ),
-        Transform::from_xyz(0.0, 0.0, 1.0),
+        Transform::from_xyz(100.0, 490.0, 1.0),
         Hitbox {
             size: Vec2::new(32.0, 64.0),
             offset: Vec2::new(0.0, -12.0),
