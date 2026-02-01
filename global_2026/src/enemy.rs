@@ -1,12 +1,15 @@
 use bevy::prelude::*;
-// use rand::prelude::*;
+use rand::prelude::*;
+use std::time::Duration;
 
 use crate::collision::Hitbox;
 use crate::level::LevelEntity;
+use crate::stunned::Stunned;
 use crate::player::{Player, HasMask};
 
 const ENEMY_VELOCITY: f32 = 320.0;
 const EPSILON: f32 = 5.0;
+const TARGET_FUSE_TIME:[i32; 4] = [3,4,5,6];
 
 pub struct EnemyPlugin;
 
@@ -16,6 +19,7 @@ impl Plugin for EnemyPlugin {
         app.add_systems(
             FixedUpdate,
             (
+                random_target_spawner,
                 enemy_animation,
                 enemy_movement,
                 collide_player,
@@ -23,6 +27,7 @@ impl Plugin for EnemyPlugin {
             )
                 .chain(),
         );
+
     }
 }
 
@@ -80,6 +85,9 @@ pub fn enemy_setup(
             Detection {
                 size: Vec2::splat(336.0),
             },
+            FuseTime {
+                timer: Timer::new(Duration::from_secs(3), TimerMode::Once)
+            }
         ))
         .insert(LevelEntity);
 
@@ -103,6 +111,9 @@ pub fn enemy_setup(
             Detection {
                 size: Vec2::splat(336.0),
             },
+            FuseTime {
+                timer: Timer::new(Duration::from_secs(2), TimerMode::Once)
+            }
         ))
         .insert(LevelEntity);
 
@@ -126,6 +137,9 @@ pub fn enemy_setup(
             Detection {
                 size: Vec2::splat(336.0),
             },
+            FuseTime {
+                timer: Timer::new(Duration::from_secs(4), TimerMode::Once)
+            }
         ))
         .insert(LevelEntity);
 }
@@ -152,9 +166,13 @@ pub fn enemy_animation(
 fn enemy_movement(
     time: Res<Time>,
     mut commands: Commands,
-    mut enemy_query: Query<(Entity, &mut Transform, &Target), (With<Target>, With<Enemy>)>,
+    mut enemy_query: Query<(Entity, &mut Transform, &Target, Option<&Stunned>), (With<Target>, With<Enemy>)>,
 ) {
-    for (entity, mut transform, target) in &mut enemy_query {
+    for (entity, mut transform, target, stunned) in &mut enemy_query {
+        if stunned.is_some() {
+            continue;
+        }
+
         if !close_to_target(target, *transform, EPSILON) {
             let mut dir = Vec2::ZERO;
 
@@ -184,11 +202,12 @@ fn enemy_movement(
             }
         } else {
             commands.entity(entity).remove::<Target>();
+            commands.entity(entity).insert(FuseTime{
+                timer: Timer::new(Duration::from_secs(2), TimerMode::Once),
+            });
         }
     }
 }
-
-
 
 fn collide_player(
     enemy_query: Query<(&Transform, &Hitbox), With<Enemy>>,
@@ -253,7 +272,32 @@ fn detect_player(
             commands.entity(entity).insert(Target{
                 pos: Vec2::new(player_transform.translation.x, player_transform.translation.y),
             });
+        }
+    }
+}
 
+fn random_target_spawner(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut enemy_query: Query<(Entity, &mut FuseTime), (Without<Target>, With<Enemy>)>
+) {
+    for (entity, mut fuse_timer) in enemy_query.iter_mut() {
+        fuse_timer.timer.tick(time.delta());
+
+
+        if fuse_timer.timer.just_finished() {
+            let mut rng = rand::thread_rng();
+            
+            let target = Target{
+                pos: Vec2{
+                    x: rng.gen_range(100.0..1800.0),
+                    y: rng.gen_range(100.0..800.0)
+                }
+            };
+
+
+            commands.entity(entity).insert(target);
+            commands.entity(entity).remove::<FuseTime>();
         }
     }
 }
@@ -283,13 +327,13 @@ pub struct Target {
     pos: Vec2,
 }
 
-/*
+
 #[derive(Component)]
 struct FuseTime {
     /// non-repeating timer
     timer: Timer,
 }
-*/
+
 
 #[derive(Component)]
 pub struct AnimationIndices {
