@@ -10,7 +10,9 @@ pub struct RestartButton;
 #[derive(Component)]
 pub struct ScoreText;
 
-pub fn hud_setup(mut commands: Commands) {
+pub fn hud_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let font: Handle<Font> = asset_server.load("fonts/NotoSansSymbols2-Regular.ttf");
+
     commands.spawn((
         Text::new("Bomberdude 0.0.1"),
         TextFont {
@@ -26,11 +28,27 @@ pub fn hud_setup(mut commands: Commands) {
         },
     ));
 
+    // control help
+    commands.spawn((
+        Text::new("⇦A  ⇧W  ⇩S  ⇨D\n␣ Drop a bomb"),
+        TextFont {
+            font,
+            font_size: 18.0,
+            ..default()
+        },
+        TextColor(Color::WHITE.into()),
+        Node {
+            position_type: PositionType::Absolute,
+            bottom: Val::Px(35.0),
+            right: Val::Px(10.0),
+            ..default()
+        },
+    ));
 
     commands.spawn((
         Text::new("Drop Truth Bombs and Unmask Oppressors!"),
         TextFont {
-            font_size: 15.0,
+            font_size: 18.0,
             ..default()
         },
         TextColor(Color::WHITE.into()),
@@ -40,9 +58,24 @@ pub fn hud_setup(mut commands: Commands) {
             left: Val::Px(10.0),
             ..default()
         },
+    ));
+
+    commands.spawn((
+        Text::new(""),
+        TextFont {
+            font_size: 18.0,
+            ..default()
+        },
+        TextColor(Color::WHITE.into()),
+        Node {
+            position_type: PositionType::Absolute,
+            top: Val::Px(30.0),
+            left: Val::Px(10.0),
+            ..default()
+        },
     )).insert(ScoreText);
 
-/**
+    /*
     commands.spawn((
         Text::new("Unmask Oppressors"),
         TextFont {
@@ -57,8 +90,8 @@ pub fn hud_setup(mut commands: Commands) {
             ..default()
         },
     ));
-**/
-    
+    */
+
     // Exit Button
     commands
         .spawn((
