@@ -250,6 +250,11 @@ fn collide_player(
             if stunned.is_some() {
                 commands.entity(enemy_entity).despawn();
                 unmasked_score.0 += 1; // increment score
+                
+                if unmasked_score.0 == 3 {
+                    next_state.set(GameState::GameOver);
+                }
+
                 println!("💀 Enemy killed while stunned!");
             } else {
                 kill = true;

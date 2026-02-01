@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use crate::player::Player;
 use crate::blast::spawn_blast;
 
-const BOMB_LIFETIME_SECS: f32 = 5.0;
+const BOMB_LIFETIME_SECS: f32 = 3.0;
 pub const BOMB_SIZE: f32 = 55.0;
 pub const BOMB_Z: f32 = 0.5;
 const FLASH_INTERVAL_SLOW: f32 = 0.6; // start slow

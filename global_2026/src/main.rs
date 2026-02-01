@@ -4,6 +4,7 @@ mod enemy;
 mod gizmos;
 mod bomb;
 mod hud;
+mod gameover;
 mod mask;
 mod blast;
 mod collision;
@@ -14,6 +15,7 @@ mod unmasked;
 use bevy::prelude::*;
 use bevy::camera::ScalingMode;
 use bevy::prelude::OrthographicProjection;
+use bevy::app::AppExit;
 use crate::enemy::EnemyPlugin;
 use crate::player::PlayerPlugin;
 use crate::gizmos::GizmosPlugin;
@@ -41,6 +43,7 @@ fn main() {
         .add_plugins(GizmosPlugin)
         .init_state::<GameState>()
         .insert_resource(UnmaskedScore::default())
+        .add_systems(OnEnter(GameState::GameOver), gameover::gameover_setup)
         .add_systems(OnEnter(GameState::Restart), (restart_game, player::player_setup, enemy::enemy_setup))
         .add_systems(Startup, (main_setup, map::map_setup,bomb::bomb_setup, hud::hud_setup, mask::mask_setup))
         .add_systems(Update, (bomb::bomb_update, blast::blast_update, hud::hud_update, hud::hud_score_update))
@@ -68,4 +71,10 @@ fn main_setup(mut commands: Commands) {
 fn restart_game(mut commands: Commands, entities: Query<Entity, With<LevelEntity>>)
 {
     despawn_entities(&mut commands, entities.iter());
+}
+
+fn end_game(
+) {
+
+    println!("GAEME OVER");
 }
