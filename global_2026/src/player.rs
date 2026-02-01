@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use crate::collision::Hitbox;
+use crate::level::LevelEntity;
 
 const SPEED: f32 = 300.0;
 
@@ -72,7 +73,7 @@ pub fn player_setup(
             size: Vec2::new(32.0, 64.0),
             offset: Vec2::new(0.0, -12.0),
         },
-    ));
+    )).insert(Player).insert(LevelEntity);
 }
 
 pub fn player_fixed_update(

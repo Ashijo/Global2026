@@ -3,6 +3,7 @@ use bevy::prelude::Gizmo;
 use rand::prelude::*;
 
 use crate::collision::Hitbox;
+use crate::level::LevelEntity;
 use crate::player::Player;
 
 const ENEMY_VELOCITY: f32 = 400.0;
@@ -64,7 +65,7 @@ pub fn enemy_setup(
             size: Vec2::splat(64.0),
             offset: Vec2::ZERO,
         },
-    ));
+    )).insert(LevelEntity);
 
     commands.spawn((
         Enemy {
@@ -85,7 +86,7 @@ pub fn enemy_setup(
             size: Vec2::splat(64.0),
             offset: Vec2::ZERO,
         },
-    ));
+    )).insert(LevelEntity);
 
     commands.spawn((
         Enemy {
@@ -106,7 +107,7 @@ pub fn enemy_setup(
             size: Vec2::splat(64.0),
             offset: Vec2::ZERO,
         },
-    ));
+    )).insert(LevelEntity);
 }
 
 pub fn enemy_update() {}
