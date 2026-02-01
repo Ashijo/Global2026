@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use crate::collision::Hitbox;
+use crate::stunned::Stunned;
 use crate::level::LevelEntity;
 
 const SPEED: f32 = 300.0;
@@ -78,11 +79,16 @@ pub fn player_setup(
 pub fn player_fixed_update(
     keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
-    mut q: Query<(&mut Transform, &mut Facing, &mut Anim, &mut Sprite), With<Player>>,
+    mut q: Query<(&mut Transform, &mut Facing, &mut Anim, &mut Sprite, Option<&Stunned>), With<Player>>,
 ) {
-    let Ok((mut tf, mut facing, mut anim, mut sprite)) = q.single_mut() else {
+    let Ok((mut tf, mut facing, mut anim, mut sprite, stunned)) = q.single_mut() else {
         return;
     };
+
+    if stunned.is_some() {
+        anim.playing = false;
+        return;
+    }
 
     let mut dir = Vec2::ZERO;
     if keys.pressed(KeyCode::KeyA) { dir.x -= 1.0; }
