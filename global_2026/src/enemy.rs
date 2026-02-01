@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-// use rand::prelude::*;
+use rand::prelude::*;
+use std::time::Duration;
 
 use crate::collision::Hitbox;
 use crate::level::LevelEntity;
@@ -16,6 +17,7 @@ impl Plugin for EnemyPlugin {
         app.add_systems(
             FixedUpdate,
             (
+                random_target_spawner,
                 enemy_animation,
                 enemy_movement,
                 collide_player,
@@ -80,6 +82,9 @@ pub fn enemy_setup(
             Detection {
                 size: Vec2::splat(336.0),
             },
+            FuseTime {
+                timer: Timer::new(Duration::from_secs(3), TimerMode::Once)
+            }
         ))
         .insert(LevelEntity);
 
@@ -258,6 +263,26 @@ fn detect_player(
     }
 }
 
+fn random_target_spawner(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut enemy_query: Query<(Entity, &mut FuseTime), (Without<Target>, With<Enemy>)>
+) {
+    for (entity, mut fuse_timer) in enemy_query.iter_mut() {
+        fuse_timer.timer.tick(time.delta());
+
+
+        if fuse_timer.timer.just_finished() {
+            let target = Target{
+                pos: Vec2::ZERO
+            };
+
+
+            commands.entity(entity).insert(target);
+        }
+    }
+}
+
 fn close_to_target(target: &Target, trans: Transform, eps: f32) -> bool {
     eps_x(target, trans, eps) && eps_y(target, trans, eps)
 }
@@ -283,13 +308,13 @@ pub struct Target {
     pos: Vec2,
 }
 
-/*
+
 #[derive(Component)]
 struct FuseTime {
     /// non-repeating timer
     timer: Timer,
 }
-*/
+
 
 #[derive(Component)]
 pub struct AnimationIndices {
