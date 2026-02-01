@@ -201,7 +201,7 @@ fn enemy_movement(
             }
         } else {
             commands.entity(entity).remove::<Target>();
-
+            
             let mut rng = rand::thread_rng();
             let fuse_time = TARGET_FUSE_TIME.choose(&mut rng).unwrap();
 
@@ -249,7 +249,7 @@ fn detect_player(
     mut commands: Commands,
     player_transform: Single<&Transform, With<Player>>,
     player_has_mask: Single<&HasMask, With<Player>>,
-    mut enemy_query: Query<(Entity, &Transform, &Detection), (Without<Target>, With<Enemy>)>,
+    mut enemy_query: Query<(Entity, &Transform, &Detection, Option<&Target>), (With<Enemy>)>,
     mut chasing_query: Query<Entity, (With<Enemy>, With<Target>)>,
 ) {
     if player_has_mask.0 {
@@ -258,7 +258,7 @@ fn detect_player(
         }
         return;
     }
-    for (entity, en_trans, detection) in &mut enemy_query {
+    for (entity, en_trans, detection, target) in &mut enemy_query {
         let en_min_x = en_trans.translation.x - detection.size.x / 2.0;
         let en_max_x = en_trans.translation.x + detection.size.x / 2.0;
         let en_min_y = en_trans.translation.y - detection.size.y / 2.0;
@@ -272,6 +272,10 @@ fn detect_player(
         let detect = x_overlap && y_overlap;
 
         if detect {
+            if target.is_some() {
+                commands.entity(entity).remove::<Target>();
+            }
+
             commands.entity(entity).insert(Target{
                 pos: Vec2::new(player_transform.translation.x, player_transform.translation.y),
             });
