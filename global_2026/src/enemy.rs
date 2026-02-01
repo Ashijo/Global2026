@@ -13,7 +13,7 @@ pub struct EnemyPlugin;
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, enemy_setup);
-        app.add_systems(FixedUpdate, (enemy_fixed_update, collide_player, gizmo_hitbox));
+        app.add_systems(FixedUpdate, (enemy_fixed_update, collide_player, gizmo_hitbox).chain());
     }
 }
 
@@ -132,8 +132,6 @@ pub fn enemy_fixed_update(
         match &enemy.target {
             Some(value) => {
                 if !close_to_target(value, *transform, EPSILON) {
-
-
                     let mut dir = Vec2::ZERO;
 
                     if !eps_x(value, *transform, EPSILON) {
