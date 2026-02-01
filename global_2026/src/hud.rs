@@ -7,7 +7,9 @@ pub struct ExitButton;
 #[derive(Component)]
 pub struct RestartButton;
 
-pub fn hud_setup(mut commands: Commands) {
+pub fn hud_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let font: Handle<Font> = asset_server.load("fonts/NotoSansSymbols2-Regular.ttf");
+
     commands.spawn((
         Text::new("Bomberdude 0.0.1"),
         TextFont {
@@ -18,6 +20,23 @@ pub fn hud_setup(mut commands: Commands) {
         Node {
             position_type: PositionType::Absolute,
             bottom: Val::Px(10.0),
+            right: Val::Px(10.0),
+            ..default()
+        },
+    ));
+
+    // control help
+    commands.spawn((
+        Text::new("⇦A  ⇧W  ⇩S  ⇨D\nDrop a bomb ␣ "),
+        TextFont {
+            font,
+            font_size: 18.0,
+            ..default()
+        },
+        TextColor(Color::WHITE.into()),
+        Node {
+            position_type: PositionType::Absolute,
+            bottom: Val::Px(35.0),
             right: Val::Px(10.0),
             ..default()
         },
@@ -105,6 +124,8 @@ pub fn hud_setup(mut commands: Commands) {
                 TextColor(Color::WHITE.into()),
             ));
         });
+
+
 }
 
 pub fn hud_update(
