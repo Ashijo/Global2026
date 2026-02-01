@@ -3,6 +3,7 @@ use rand::prelude::*;
 use std::time::Duration;
 
 use crate::collision::Hitbox;
+use crate::GameState;
 use crate::level::LevelEntity;
 use crate::stunned::Stunned;
 use crate::player::{Player, HasMask};
@@ -213,6 +214,7 @@ fn collide_player(
     enemy_query: Query<(&Transform, &Hitbox), With<Enemy>>,
     player_transform: Single<&Transform, With<Player>>,
     player_hitbox: Single<&Hitbox, With<Player>>,
+    mut next_state: ResMut<NextState<GameState>>,
 ) {
     let mut kill = false;
 
@@ -238,7 +240,13 @@ fn collide_player(
     }
 
     if kill {
-        println!("DEAD !!!");
+        if cfg!(debug_assertions) {
+            println!("DEAD !!!");
+        }
+        else {
+            next_state.set(GameState::GameOver);
+            //println!("{:?}", next_state);
+        }
     }
 }
 
