@@ -14,7 +14,7 @@ pub struct EnemyPlugin;
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, enemy_setup);
-        app.add_systems(FixedUpdate, (enemy_fixed_update, collide_player, gizmo_hitbox).chain());
+        app.add_systems(FixedUpdate, (enemy_fixed_update, collide_player, gizmo_hitbox, gizmo_detection).chain());
     }
 }
 
@@ -64,6 +64,8 @@ pub fn enemy_setup(
         Hitbox {
             size: Vec2::splat(64.0),
             offset: Vec2::ZERO,
+        },Detection {
+            size: Vec2::splat(336.0)
         },
     )).insert(LevelEntity);
 
@@ -85,6 +87,8 @@ pub fn enemy_setup(
         Hitbox {
             size: Vec2::splat(64.0),
             offset: Vec2::ZERO,
+        },Detection {
+            size: Vec2::splat(336.0)
         },
     )).insert(LevelEntity);
 
@@ -106,6 +110,9 @@ pub fn enemy_setup(
         Hitbox {
             size: Vec2::splat(64.0),
             offset: Vec2::ZERO,
+        },
+        Detection {
+            size: Vec2::splat(336.0)
         },
     )).insert(LevelEntity);
 }
@@ -199,6 +206,24 @@ fn gizmo_hitbox(
     }
 }
 
+
+fn gizmo_detection(
+    mut gizmos: Gizmos,
+    mut detection_query: Query<(&Detection, &Transform)>
+) {
+    for (detection, transform) in &detection_query {
+        let min_x = transform.translation.x - detection.size.x / 2.0;
+        let max_x = transform.translation.x + detection.size.x / 2.0;
+        let min_y = transform.translation.y - detection.size.y / 2.0;
+        let max_y = transform.translation.y + detection.size.y / 2.0;
+
+        gizmos.line_2d(Vec2::new(min_x, min_y), Vec2::new(min_x, max_y), GREEN);
+        gizmos.line_2d(Vec2::new(min_x, min_y), Vec2::new(max_x, min_y), GREEN);
+        gizmos.line_2d(Vec2::new(max_x, max_y), Vec2::new(min_x, max_y), GREEN);
+        gizmos.line_2d(Vec2::new(max_x, max_y), Vec2::new(max_x, min_y), GREEN);
+    }
+}
+
 fn collide_player(
     mut enemy_query: Query<(&Transform, &Hitbox), With<Enemy>>,
     mut player_transform: Single<&Transform, With<Player>>,
@@ -244,6 +269,11 @@ fn eps_y(target: &Target, trans: Transform, eps: f32) -> bool {
 pub struct Enemy {
     target: Option<Target>,
     id: u32,
+}
+
+#[derive(Component)]
+struct Detection {
+    size: Vec2
 }
 
 pub struct Target {
