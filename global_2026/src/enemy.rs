@@ -1,5 +1,5 @@
-use bevy::{color::palettes::css::*, prelude::*} ;
-use rand::prelude::*;
+use bevy::{color::palettes::css::*, prelude::*};
+// use rand::prelude::*;
 
 use crate::collision::Hitbox;
 use crate::level::LevelEntity;
@@ -13,7 +13,18 @@ pub struct EnemyPlugin;
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, enemy_setup);
-        app.add_systems(FixedUpdate, (enemy_fixed_update, collide_player, detect_player, gizmo_hitbox, gizmo_detection).chain());
+        app.add_systems(
+            FixedUpdate,
+            (
+                enemy_animation,
+                enemy_movement,
+                collide_player,
+                detect_player,
+                gizmo_hitbox,
+                gizmo_detection,
+            )
+                .chain(),
+        );
     }
 }
 
@@ -51,78 +62,79 @@ pub fn enemy_setup(
     transform_2.translation = Vec3::new(1750.0, 500.0, 1.0);
     transform_3.translation = Vec3::new(1750.0, 800.0, 1.0);
 
-    commands.spawn((
-        Enemy {
-            target: None
-        },
-        Sprite::from_atlas_image(
-            texture.clone(),
-            TextureAtlas {
-                layout: texture_atlas_layout.clone(),
-                index: animation_indices_1.first,
+    commands
+        .spawn((
+            Enemy,
+            Sprite::from_atlas_image(
+                texture.clone(),
+                TextureAtlas {
+                    layout: texture_atlas_layout.clone(),
+                    index: animation_indices_1.first,
+                },
+            ),
+            transform_1,
+            animation_indices_1,
+            AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+            Hitbox {
+                size: Vec2::splat(64.0),
+                offset: Vec2::ZERO,
             },
-        ),
-        transform_1,
-        animation_indices_1,
-        AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
-        Hitbox {
-            size: Vec2::splat(64.0),
-            offset: Vec2::ZERO,
-        },Detection {
-            size: Vec2::splat(336.0)
-        },
-    )).insert(LevelEntity);
+            Detection {
+                size: Vec2::splat(336.0),
+            },
+        ))
+        .insert(LevelEntity);
 
-    commands.spawn((
-        Enemy {
-            target: None
-        },
-        Sprite::from_atlas_image(
-            texture.clone(),
-            TextureAtlas {
-                layout: texture_atlas_layout.clone(),
-                index: animation_indices_2.first,
+    commands
+        .spawn((
+            Enemy,
+            Sprite::from_atlas_image(
+                texture.clone(),
+                TextureAtlas {
+                    layout: texture_atlas_layout.clone(),
+                    index: animation_indices_2.first,
+                },
+            ),
+            transform_2,
+            animation_indices_2,
+            AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+            Hitbox {
+                size: Vec2::splat(64.0),
+                offset: Vec2::ZERO,
             },
-        ),
-        transform_2,
-        animation_indices_2,
-        AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
-        Hitbox {
-            size: Vec2::splat(64.0),
-            offset: Vec2::ZERO,
-        },Detection {
-            size: Vec2::splat(336.0)
-        },
-    )).insert(LevelEntity);
+            Detection {
+                size: Vec2::splat(336.0),
+            },
+        ))
+        .insert(LevelEntity);
 
-    commands.spawn((
-        Enemy {
-            target: None
-        },
-        Sprite::from_atlas_image(
-            texture.clone(),
-            TextureAtlas {
-                layout: texture_atlas_layout.clone(),
-                index: animation_indices_3.first,
+    commands
+        .spawn((
+            Enemy,
+            Sprite::from_atlas_image(
+                texture.clone(),
+                TextureAtlas {
+                    layout: texture_atlas_layout.clone(),
+                    index: animation_indices_3.first,
+                },
+            ),
+            transform_3,
+            animation_indices_3,
+            AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+            Hitbox {
+                size: Vec2::splat(64.0),
+                offset: Vec2::ZERO,
             },
-        ),
-        transform_3,
-        animation_indices_3,
-        AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
-        Hitbox {
-            size: Vec2::splat(64.0),
-            offset: Vec2::ZERO,
-        },
-        Detection {
-            size: Vec2::splat(336.0)
-        },
-    )).insert(LevelEntity);
+            Detection {
+                size: Vec2::splat(336.0),
+            },
+        ))
+        .insert(LevelEntity);
 }
 
-pub fn enemy_fixed_update(
+pub fn enemy_animation(
     time: Res<Time>,
     mut animation: Query<(&AnimationIndices, &mut AnimationTimer, &mut Sprite)>,
-    mut enemy_query: Query<(&mut Enemy, &mut Transform)>,
 ) {
     for (indices, mut timer, mut sprite) in &mut animation {
         timer.tick(time.delta());
@@ -137,64 +149,48 @@ pub fn enemy_fixed_update(
             };
         }
     }
+}
 
+fn enemy_movement(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut enemy_query: Query<(Entity, &mut Transform, &Target), (With<Target>, With<Enemy>)>,
+) {
+    for (entity, mut transform, target) in &mut enemy_query {
+        if !close_to_target(target, *transform, EPSILON) {
+            let mut dir = Vec2::ZERO;
 
-    for (mut enemy, mut transform) in &mut enemy_query {
-        match &enemy.target {
-            Some(value) => {
-
-
-                if !close_to_target(value, *transform, EPSILON) {
-                    let mut dir = Vec2::ZERO;
-
-                    if !eps_x(value, *transform, EPSILON) {
-                        if value.x < transform.translation.x {
-                            dir.x -= 1.0;
-                        } else if value.x > transform.translation.x {
-                            dir.x += 1.0;
-                        }
-                    }
-
-                    if !eps_y(value, *transform, EPSILON) {
-                        if value.y < transform.translation.y {
-                            dir.y -= 1.0;
-                        } else if value.y > transform.translation.y {
-                            dir.y += 1.0;
-                        }
-                    }
-
-                    if dir != Vec2::ZERO {
-                        dir = dir.normalize();
-                        let dt = time.delta_secs();
-
-                        transform.translation.x += dir.x * ENEMY_VELOCITY * dt;
-                        transform.translation.y += dir.y * ENEMY_VELOCITY * dt;
-                    }
-                } else {
-                    enemy.target = None;
+            if !eps_x(target, *transform, EPSILON) {
+                if target.pos.x < transform.translation.x {
+                    dir.x -= 1.0;
+                } else if target.pos.x > transform.translation.x {
+                    dir.x += 1.0;
                 }
             }
-            None => {
-                // Generate and shuffle a sequence:
-                let nums_h: Vec<u32> = (1..1920).collect();
-                let nums_v: Vec<u32> = (1..1080).collect();
-                let mut rng = rand::rng();
-                let new_x = nums_h.choose(&mut rng);
-                let new_y = nums_v.choose(&mut rng);
 
-                enemy.target = Some(Target {
-                    x: *new_x.unwrap() as f32,
-                    y: *new_y.unwrap() as f32,
-                });
+            if !eps_y(target, *transform, EPSILON) {
+                if target.pos.y < transform.translation.y {
+                    dir.y -= 1.0;
+                } else if target.pos.y > transform.translation.y {
+                    dir.y += 1.0;
+                }
             }
+
+
+            if dir != Vec2::ZERO {
+                dir = dir.normalize();
+                let dt = time.delta_secs();
+
+                transform.translation.x += dir.x * ENEMY_VELOCITY * dt;
+                transform.translation.y += dir.y * ENEMY_VELOCITY * dt;
+            }
+        } else {
+            commands.entity(entity).remove::<Target>();
         }
     }
 }
 
-fn gizmo_hitbox(
-    mut gizmos: Gizmos,
-    hitbox_query: Query<(&Hitbox, &Transform)>
-) {
+fn gizmo_hitbox(mut gizmos: Gizmos, hitbox_query: Query<(&Hitbox, &Transform)>) {
     for (hitbox, transform) in &hitbox_query {
         let min_x = transform.translation.x - hitbox.size.x / 2.0 + hitbox.offset.x;
         let max_x = transform.translation.x + hitbox.size.x / 2.0 + hitbox.offset.x;
@@ -208,11 +204,7 @@ fn gizmo_hitbox(
     }
 }
 
-
-fn gizmo_detection(
-    mut gizmos: Gizmos,
-    detection_query: Query<(&Detection, &Transform)>
-) {
+fn gizmo_detection(mut gizmos: Gizmos, detection_query: Query<(&Detection, &Transform)>) {
     for (detection, transform) in &detection_query {
         let min_x = transform.translation.x - detection.size.x / 2.0;
         let max_x = transform.translation.x + detection.size.x / 2.0;
@@ -233,10 +225,14 @@ fn collide_player(
 ) {
     let mut kill = false;
 
-    let p_min_x = player_transform.translation.x - player_hitbox.size.x / 2.0 + player_hitbox.offset.x;
-    let p_max_x = player_transform.translation.x + player_hitbox.size.x / 2.0  + player_hitbox.offset.x;
-    let p_min_y = player_transform.translation.y - player_hitbox.size.y / 2.0 + player_hitbox.offset.y;
-    let p_max_y = player_transform.translation.y + player_hitbox.size.y / 2.0 + player_hitbox.offset.y;
+    let p_min_x =
+        player_transform.translation.x - player_hitbox.size.x / 2.0 + player_hitbox.offset.x;
+    let p_max_x =
+        player_transform.translation.x + player_hitbox.size.x / 2.0 + player_hitbox.offset.x;
+    let p_min_y =
+        player_transform.translation.y - player_hitbox.size.y / 2.0 + player_hitbox.offset.y;
+    let p_max_y =
+        player_transform.translation.y + player_hitbox.size.y / 2.0 + player_hitbox.offset.y;
 
     for (en_trans, hitbox) in &enemy_query {
         let en_min_x = en_trans.translation.x - hitbox.size.x / 2.0;
@@ -256,22 +252,28 @@ fn collide_player(
 }
 
 fn detect_player(
+    mut commands: Commands,
     player_transform: Single<&Transform, With<Player>>,
-    mut enemy_query: Query<(&Transform, &Detection, &mut Enemy)>
+    mut enemy_query: Query<(Entity, &Transform, &Detection), (Without<Target>, With<Enemy>)>,
 ) {
-    for (en_trans, detection, mut enemy) in &mut enemy_query {
+    for (entity, en_trans, detection) in &mut enemy_query {
         let en_min_x = en_trans.translation.x - detection.size.x / 2.0;
         let en_max_x = en_trans.translation.x + detection.size.x / 2.0;
         let en_min_y = en_trans.translation.y - detection.size.y / 2.0;
         let en_max_y = en_trans.translation.y + detection.size.y / 2.0;
 
-        let x_overlap = player_transform.translation.x < en_max_x && player_transform.translation.x > en_min_x;
-        let y_overlap = player_transform.translation.y < en_max_y && player_transform.translation.y > en_min_y;
+        let x_overlap =
+            player_transform.translation.x < en_max_x && player_transform.translation.x > en_min_x;
+        let y_overlap =
+            player_transform.translation.y < en_max_y && player_transform.translation.y > en_min_y;
 
         let detect = x_overlap && y_overlap;
 
         if detect {
-            enemy.target = Some(Target{x: player_transform.translation.x, y:player_transform.translation.y});
+            commands.entity(entity).insert(Target{
+                pos: Vec2::new(player_transform.translation.x, player_transform.translation.y),
+            });
+
         }
     }
 }
@@ -281,27 +283,33 @@ fn close_to_target(target: &Target, trans: Transform, eps: f32) -> bool {
 }
 
 fn eps_x(target: &Target, trans: Transform, eps: f32) -> bool {
-    target.x + eps >= trans.translation.x && target.x - eps <= trans.translation.x
+    return target.pos.x + eps >= trans.translation.x && target.pos.x - eps <= trans.translation.x;
 }
 
 fn eps_y(target: &Target, trans: Transform, eps: f32) -> bool {
-    target.y + eps >= trans.translation.y && target.y - eps <= trans.translation.y
+    target.pos.y + eps >= trans.translation.y && target.pos.y - eps <= trans.translation.y
 }
 
 #[derive(Component)]
-pub struct Enemy {
-    target: Option<Target>
-}
+pub struct Enemy;
 
 #[derive(Component)]
 struct Detection {
-    size: Vec2
+    size: Vec2,
 }
 
+#[derive(Component)]
 pub struct Target {
-    x: f32,
-    y: f32,
+    pos: Vec2,
 }
+
+/*
+#[derive(Component)]
+struct FuseTime {
+    /// non-repeating timer
+    timer: Timer,
+}
+*/
 
 #[derive(Component)]
 pub struct AnimationIndices {
