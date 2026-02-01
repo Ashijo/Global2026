@@ -42,11 +42,10 @@ pub fn hud_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     ));
 
-    /*
     commands.spawn((
-        Text::new("Unmasked:0"),
+        Text::new("Drop Truth Bombs and Unmask Oppressors!"),
         TextFont {
-            font_size: 20.0,
+            font_size: 15.0,
             ..default()
         },
         TextColor(Color::WHITE.into()),
@@ -58,9 +57,9 @@ pub fn hud_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     ));
 
-
+    /*
     commands.spawn((
-        Text::new("Truth Bombs:5"),
+        Text::new("Unmask Oppressors"),
         TextFont {
             font_size: 20.0,
             ..default()
@@ -74,7 +73,7 @@ pub fn hud_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     ));
     */
-    
+
     // Exit Button
     commands
         .spawn((
@@ -124,8 +123,6 @@ pub fn hud_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 TextColor(Color::WHITE.into()),
             ));
         });
-
-
 }
 
 pub fn hud_update(
