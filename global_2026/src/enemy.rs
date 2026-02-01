@@ -38,6 +38,7 @@ pub fn enemy_setup(
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let texture = asset_server.load("img/enemy.png");
+    let cop_texture = asset_server.load("img/cop_2.png");
 
     // from_grid define spritesheet division ( tile_size: UVec2,
     //     columns: u32,
@@ -51,14 +52,27 @@ pub fn enemy_setup(
         Some(UVec2::splat(1)),
         Some(UVec2::splat(1)),
     );
+
+    let cop_layout = TextureAtlasLayout::from_grid(
+        UVec2 {  
+            x: 49,
+            y: 65
+        },
+        9,
+        1,
+        None,
+        None
+    );
+
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
+    let cop_texture_atlas_layout = texture_atlas_layouts.add(cop_layout);
 
     // Use only the subset of sprites in the sheet that make up the run animation
-    let animation_indices_1 = AnimationIndices { first: 0, last: 2 };
+    let animation_indices_1 = AnimationIndices { first: 0, last: 8 };
     let animation_indices_2 = AnimationIndices { first: 3, last: 5 };
     let animation_indices_3 = AnimationIndices { first: 6, last: 8 };
 
-    let mut transform_1 = Transform::from_scale(Vec3::splat(4.0));
+    let mut transform_1 = Transform::from_scale(Vec3::splat(1.0));
     let mut transform_2 = Transform::from_scale(Vec3::splat(4.0));
     let mut transform_3 = Transform::from_scale(Vec3::splat(4.0));
 
@@ -72,7 +86,7 @@ pub fn enemy_setup(
             Sprite::from_atlas_image(
                 texture.clone(),
                 TextureAtlas {
-                    layout: texture_atlas_layout.clone(),
+                    layout: cop_texture_atlas_layout.clone(),
                     index: animation_indices_1.first,
                 },
             ),
